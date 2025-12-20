@@ -27,7 +27,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private float bulletTimeToLive = 2f;
         [SerializeField] private AudioSource fireSound;
 
-
         private void Awake()
         {
             InputManager.Instance.Controls.GAME.Move.performed += OnMove;
@@ -40,7 +39,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             InputManager.Instance.Controls.GAME.Shoot.performed += OnShoot;
 
-            InputManager.Instance.EnableActionMap(ActionMapName.GAME);
+            EnableControls();
         }
 
         private void Update()
@@ -121,20 +120,54 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             Bullet newBullet = Instantiate(bullet);
             newBullet.transform.position = (Vector2) transform.position + (lookVector * bulletSpawnDistance);
 
+            Vector2 aimDirection = lookVector == Vector2.zero ? Vector2.up : lookVector;
+
             yield return null;
 
-            StartCoroutine(newBullet.Fire(lookVector, bulletSpeed, bulletTimeToLive));
+            StartCoroutine(newBullet.Fire(aimDirection, bulletSpeed, bulletTimeToLive));
         }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if(other.gameObject.CompareTag("asteroid"))
+                OnPlayerKilled();
+        }
+
+        private void OnPlayerKilled()
+        {
+            DisableControls();
+            GameManager.Instance.OnPlayerKilled();
+        }
+
+        public void DisableControls() => InputManager.Instance.DisableActionMap(ActionMapName.GAME);
+        public void EnableControls() => InputManager.Instance.EnableActionMap(ActionMapName.GAME);
 
         private void OnDestroy()
         {
-            if (InputManager.Instance != null)
+            CleanupInputCallbacks();
+        }
+
+        private void OnDisable()
+        {
+            // Only cleanup if the object is being destroyed, not just disabled
+            if (!gameObject.scene.isLoaded) 
             {
-                InputManager.Instance.Controls.GAME.Move.performed -= OnMove;
-                InputManager.Instance.Controls.GAME.Move.canceled -= OnStop;
-                InputManager.Instance.Controls.GAME.ControllerLook.performed -= OnControllerLook;
-                InputManager.Instance.Controls.GAME.ControllerLook.canceled -= OnControllerLookCanceled;
-                InputManager.Instance.Controls.GAME.MousePosition.performed -= OnMouseDelta;
+                CleanupInputCallbacks();
+            }
+        }
+
+        private void CleanupInputCallbacks()
+        {
+            if (InputManager.Instance != null && InputManager.Instance.Controls != null)
+            {
+                var gameControls = InputManager.Instance.Controls.GAME;
+                
+                gameControls.Move.performed -= OnMove;
+                gameControls.Move.canceled -= OnStop;
+                gameControls.ControllerLook.performed -= OnControllerLook;
+                gameControls.ControllerLook.canceled -= OnControllerLookCanceled;
+                gameControls.MousePosition.performed -= OnMouseDelta;
+                gameControls.Shoot.performed -= OnShoot;
             }
         }
     }

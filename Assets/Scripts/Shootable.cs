@@ -18,7 +18,7 @@ public class Shootable : MonoBehaviour
         if(collision.gameObject.CompareTag("bullet"))
         {
             BasicAudioManager.Instance.Play(AudioSourceName.ShootableDestroyed);
-
+            GameManager.Instance.OnAsteroidShot(this);
             Destroy(gameObject);
         }
     } 
@@ -40,6 +40,6 @@ public class Shootable : MonoBehaviour
 
     private void OnDestroy()
     {
-        AsteroidManager.Instance.OnDestroyAsteroid(this);
+        AsteroidManager.Instance.OnDestroyAsteroid(this); // TODO: Investigate null refs
     }
 }
