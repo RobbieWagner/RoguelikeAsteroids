@@ -1,45 +1,65 @@
+using System;
 using RobbieWagnerGames.Audio;
 using RobbieWagnerGames.RoguelikeAsteroids;
+using Unity.Mathematics;
 using UnityEngine;
 
-public class Shootable : MonoBehaviour
+namespace RobbieWagnerGames.RoguelikeAsteroids
 {
-    private float currentSpeed;
-    private Vector2 currentDirection;
-    [SerializeField] private Rigidbody2D rb2d;
-
-    public Vector2 xBounds;
-    public Vector2 yBounds;
-
-    [SerializeField] private Collider2D shootableCollider;
-
-    protected virtual void OnCollisionEnter2D(Collision2D collision)
+    public enum DestructionReason
     {
-        if(collision.gameObject.CompareTag("bullet"))
+        NONE = -1,
+        BULLET_HIT,
+        OUT_OF_BOUNDS,
+        CLEANUP
+    }
+
+    public class Shootable : MonoBehaviour
+    {
+        private float currentSpeed;
+        private Vector2 currentDirection;
+        [SerializeField] private Rigidbody2D rb2d;
+
+        public float boundsRadius;
+        private DestructionReason destructionReason = DestructionReason.NONE;
+
+        [SerializeField] private Collider2D shootableCollider;
+
+        protected virtual void OnCollisionEnter2D(Collision2D collision)
         {
-            BasicAudioManager.Instance.Play(AudioSourceName.ShootableDestroyed);
-            GameManager.Instance.OnAsteroidShot(this);
-            Destroy(gameObject);
+            if(collision.gameObject.CompareTag("bullet"))
+            {
+                destructionReason = DestructionReason.BULLET_HIT;
+                BasicAudioManager.Instance.Play(AudioSourceName.ShootableDestroyed);
+                Destroy(gameObject);
+            }
+        } 
+
+        public void Initialize(float speed, Vector2 direction, float newBoundsRadius)
+        {
+            currentSpeed = speed;
+            currentDirection = direction;
+            boundsRadius = newBoundsRadius;
+
+            rb2d.linearVelocity = currentSpeed * currentDirection;
         }
-    } 
 
-    public void SetMovement(float speed, Vector2 direction)
-    {
-        currentSpeed = speed;
-        currentDirection = direction;
+        private void Update() 
+        {
+            Vector2 pos = transform.position;
+            if(pos.x < -boundsRadius || pos.x > boundsRadius || 
+            pos.y < -boundsRadius || pos.y > boundsRadius)
+            {
+                destructionReason = DestructionReason.OUT_OF_BOUNDS;
+                Destroy(gameObject);
+            }
+        }
 
-        rb2d.linearVelocity = currentSpeed * currentDirection;
-    }
+        private void OnDestroy()
+        {
+            OnShootableDestroyed?.Invoke(this, destructionReason);
+        }
 
-    private void Update() 
-    {
-        Vector2 pos = transform.position;
-        if(pos.x < xBounds.x || pos.x > xBounds.y || pos.y < yBounds.x || pos.y > yBounds.y)
-            Destroy(gameObject);
-    }
-
-    private void OnDestroy()
-    {
-        AsteroidManager.Instance.OnDestroyAsteroid(this); // TODO: Investigate null refs
+        public event Action<Shootable, DestructionReason> OnShootableDestroyed;
     }
 }

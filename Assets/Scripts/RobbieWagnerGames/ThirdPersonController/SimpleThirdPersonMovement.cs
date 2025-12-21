@@ -81,7 +81,7 @@ namespace RobbieWagnerGames.FirstPerson
             
             if (CanMove)
             {
-                InputManager.Instance.EnableActionMap(ActionMapName.EXPLORATION);
+                InputManager.Instance.EnableActionMap(ActionMapName.GAME);
             }
         }
         

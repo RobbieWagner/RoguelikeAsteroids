@@ -73,15 +73,15 @@ namespace RobbieWagnerGames.FirstPerson
 
         private void SetupInput()
         {
-            mouseLookAction = InputManager.Instance.GetAction(ActionMapName.EXPLORATION , "MouseLook");
+            mouseLookAction = InputManager.Instance.GetAction(ActionMapName.GAME , "MouseLook");
             mouseLookAction.performed += OnLookPerformed;
             mouseLookAction.canceled += OnLookCanceled;
 
-            controllerLookAction = InputManager.Instance.GetAction(ActionMapName.EXPLORATION , "ControllerLook");
+            controllerLookAction = InputManager.Instance.GetAction(ActionMapName.GAME , "ControllerLook");
             controllerLookAction.performed += OnLookPerformed;
             controllerLookAction.canceled += OnLookCanceled;
 
-            interactAction = InputManager.Instance.GetAction(ActionMapName.EXPLORATION, "Interact");
+            interactAction = InputManager.Instance.GetAction(ActionMapName.GAME, "Interact");
             interactAction.performed += OnInteractPerformed;
         }
 

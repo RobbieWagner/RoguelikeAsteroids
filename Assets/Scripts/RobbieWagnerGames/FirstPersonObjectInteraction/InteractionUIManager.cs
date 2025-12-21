@@ -35,13 +35,13 @@ namespace RobbieWagnerGames.FirstPerson.Interaction
 
         public void EnableCursor()
         {
-            if(InputManager.Instance.CurrentActiveMaps.Contains(ActionMapName.EXPLORATION))
+            if(InputManager.Instance.CurrentActiveMaps.Contains(ActionMapName.GAME))
                 cursorImage.enabled = true;
         }
         
         private void UpdateCursorState(List<ActionMapName> activeMaps)
         {
-            if(!activeMaps.Contains(ActionMapName.EXPLORATION))
+            if(!activeMaps.Contains(ActionMapName.GAME))
             {
                 DisableCursor();
             }

@@ -11,7 +11,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private Button exitButton;
 
         private void Awake() {
-            playButton.onClick.AddListener(GameManager.Instance.PlayGameFromMenu);
+            playButton.onClick.AddListener(GameManager.Instance.StartGame);
             settingsButton.onClick.AddListener(OpenSettingsMenu);
             exitButton.onClick.AddListener(QuitApplication);
         }

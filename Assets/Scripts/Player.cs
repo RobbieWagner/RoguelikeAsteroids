@@ -136,7 +136,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void OnPlayerKilled()
         {
             DisableControls();
-            GameManager.Instance.OnPlayerKilled();
+            GameManager.Instance.NotifyGameOver();
         }
 
         public void DisableControls() => InputManager.Instance.DisableActionMap(ActionMapName.GAME);
@@ -150,10 +150,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void OnDisable()
         {
             // Only cleanup if the object is being destroyed, not just disabled
-            if (!gameObject.scene.isLoaded) 
-            {
+            if (!gameObject.scene.isLoaded)
                 CleanupInputCallbacks();
-            }
         }
 
         private void CleanupInputCallbacks()

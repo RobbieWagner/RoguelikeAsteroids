@@ -1,0 +1,13 @@
+using UnityEngine;
+using RobbieWagnerGames.Utilities;
+
+namespace RobbieWagnerGames
+{
+	public class #SCRIPTNAME# : MonoBehaviourSingleton<#SCRIPTNAME#>
+	{
+		protected override void Awake()
+		{
+			base.Awake();
+		}
+	}
+}

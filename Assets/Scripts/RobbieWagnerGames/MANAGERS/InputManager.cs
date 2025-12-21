@@ -12,8 +12,8 @@ namespace RobbieWagnerGames.Managers
     /// </summary>
     public enum ActionMapName
     {
-        EXPLORATION,
-        BLOCK_BREAK,
+        //EXPLORATION,
+        //BLOCK_BREAK,
         GAME,
         DIALOGUE,
         UI,
@@ -74,13 +74,9 @@ namespace RobbieWagnerGames.Managers
             }
 
             if (disableAllOnStart)
-            {
                 DisableAllActionMaps();
-            }
             else
-            {
                 gameControls.Enable();
-            }
         }
 
         /// <summary>
@@ -89,27 +85,15 @@ namespace RobbieWagnerGames.Managers
         public void EnableActionMap(ActionMapName mapName, bool disableOthers = true)
         {
             if (disableOthers)
-            {
                 DisableAllActionMaps();
-            }
 
             if (actionMaps.TryGetValue(mapName, out var actionMap) && !currentActiveMaps.Contains(mapName))
             {
                 actionMap.Enable();
                 currentActiveMaps.Add(mapName);
-                // If enabling EXPLORATION, lock and center the cursor
-                if (mapName == ActionMapName.EXPLORATION)
-                {
-                    Cursor.lockState = CursorLockMode.Locked;
-                    Cursor.visible = false;
-                    // Move cursor to center (works in editor, not always in build)
-                    Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
-                }
             }
             else
-            {
                 Debug.LogWarning($"Could not enable action map {mapName}: not found", this);
-            }
 
             onActionMapsUpdated?.Invoke(currentActiveMaps);
         }
@@ -123,15 +107,7 @@ namespace RobbieWagnerGames.Managers
             {
                 actionMap.Disable();
                 if (currentActiveMaps.Contains(mapName))
-                {
                     currentActiveMaps.Remove(mapName);
-                }
-                // If disabling EXPLORATION, unlock and show the cursor
-                if (mapName == ActionMapName.EXPLORATION)
-                {
-                    Cursor.lockState = CursorLockMode.None;
-                    Cursor.visible = true;
-                }
             }
             else
             {
@@ -154,7 +130,7 @@ namespace RobbieWagnerGames.Managers
                     currentActiveMaps.Remove(mapPair.Key);
                 }
                 // If disabling EXPLORATION, unlock and show the cursor
-                if (mapPair.Key == ActionMapName.EXPLORATION)
+                if (mapPair.Key == ActionMapName.GAME)
                 {
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;

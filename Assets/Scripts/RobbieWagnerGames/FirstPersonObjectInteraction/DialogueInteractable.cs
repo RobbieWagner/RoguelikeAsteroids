@@ -31,7 +31,7 @@ namespace RobbieWagnerGames.FirstPerson.Interaction
 
         public override IEnumerator Interact()
         {
-            InputManager.Instance.DisableActionMap(ActionMapName.EXPLORATION);
+            InputManager.Instance.DisableActionMap(ActionMapName.GAME);
 
             if (dialogueText != null)
             {
@@ -42,7 +42,7 @@ namespace RobbieWagnerGames.FirstPerson.Interaction
                 Debug.LogWarning($"No dialogue story assigned to {gameObject.name}");
                 yield return null;
             }
-            InputManager.Instance.EnableActionMap(ActionMapName.EXPLORATION);
+            InputManager.Instance.EnableActionMap(ActionMapName.GAME);
         }
     }
 }

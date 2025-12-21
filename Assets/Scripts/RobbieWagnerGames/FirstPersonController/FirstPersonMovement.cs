@@ -79,7 +79,7 @@ namespace RobbieWagnerGames.FirstPerson
 
         private void SetupInput()
         {
-            moveAction = InputManager.Instance.GetAction(ActionMapName.EXPLORATION, "Move");
+            moveAction = InputManager.Instance.GetAction(ActionMapName.GAME, "Move");
             moveAction.performed += OnMovePerformed;
             moveAction.canceled += OnMoveCanceled;
         }
