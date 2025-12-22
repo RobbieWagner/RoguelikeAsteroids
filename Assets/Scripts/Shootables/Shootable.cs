@@ -1,7 +1,4 @@
 using System;
-using RobbieWagnerGames.Audio;
-using RobbieWagnerGames.RoguelikeAsteroids;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
@@ -24,16 +21,34 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private DestructionReason destructionReason = DestructionReason.NONE;
 
         [SerializeField] private Collider2D shootableCollider;
+        public ResourceGatherData resourceData = new ResourceGatherData();
+        public int durability = 1;
+
+        protected virtual void Awake() {
+            GenerateRandomResources();
+        }
 
         protected virtual void OnCollisionEnter2D(Collision2D collision)
         {
             if(collision.gameObject.CompareTag("bullet"))
             {
-                destructionReason = DestructionReason.BULLET_HIT;
-                BasicAudioManager.Instance.Play(AudioSourceName.ShootableDestroyed);
-                Destroy(gameObject);
+                durability--;
+                if (durability <= 0)
+                    OnShootableDestroyedFromShot();
             }
-        } 
+        }
+
+        protected virtual void OnShootableDestroyedFromShot()
+        {
+            destructionReason = DestructionReason.BULLET_HIT;
+            SpawnResourcePips();
+            Destroy(gameObject);
+        }
+
+        protected virtual void SpawnResourcePips()
+        {
+            ResourceManager.Instance.SpawnResourcePips(transform.position, resourceData);
+        }
 
         public void Initialize(float speed, Vector2 direction, float newBoundsRadius)
         {
@@ -58,6 +73,25 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void OnDestroy()
         {
             OnShootableDestroyed?.Invoke(this, destructionReason);
+        }
+
+        protected virtual void GenerateRandomResources()
+        {
+            resourceData = new ResourceGatherData();
+            
+            int totalResourceValue = UnityEngine.Random.Range(1, 10);
+            
+            ResourceType[] resourceTypes = {
+                ResourceType.TITANIUM,
+                ResourceType.PLATINUM,
+                ResourceType.IRIDIUM
+            };
+            
+            for (int i = 0; i < totalResourceValue; i++)
+            {
+                ResourceType randomType = resourceTypes[UnityEngine.Random.Range(0, resourceTypes.Length)];
+                resourceData.AddResource(randomType, 1);
+            }
         }
 
         public event Action<Shootable, DestructionReason> OnShootableDestroyed;

@@ -168,7 +168,7 @@ GameObject:
   - component: {fileID: 275845346}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -714,8 +714,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25f3404daa4d5414bb0608d149adf627, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  asteroidPrefab: {fileID: 3117594188209707119, guid: 79636a3ba875c434a906d243bf228c54, type: 3}
   maxAsteroids: 10
-  asteroidPrefab: {fileID: 3397474247504899635, guid: 79636a3ba875c434a906d243bf228c54, type: 3}
   spawnRadius: 9
   boundsRadius: 10
   targetRadius: 3
@@ -1240,7 +1240,7 @@ GameObject:
   - component: {fileID: 1722021531}
   - component: {fileID: 1722021530}
   m_Layer: 0
-  m_Name: ScoreManager
+  m_Name: ResourceManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1278,8 +1278,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a7d5689b4f36cb48ac2426ffb7b53d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreText: {fileID: 1293484191}
+  resourceText: {fileID: 1293484191}
   canvas: {fileID: 1722021533}
+  resourcePipPrefab: {fileID: 9049416671065224706, guid: 4aa62d30592e8de4384e3a41955a6fe9, type: 3}
 --- !u!114 &1722021531
 MonoBehaviour:
   m_ObjectHideFlags: 0

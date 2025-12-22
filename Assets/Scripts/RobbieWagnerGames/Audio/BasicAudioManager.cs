@@ -9,13 +9,14 @@ namespace RobbieWagnerGames.Audio
         UINav = 0,
         UISelect = 1,
         UIExit = 2,
-        ShootableDestroyed = 3,
+        AsteroidDestroyed = 3,
         PointGain = 4,
         LeafGain = 5,
         FlowerGain = 6,
         Purchase = 7,
         Music = 8,
-        UIFail = 9
+        UIFail = 9,
+        ResourceCollected = 10
     }
 
     /// <summary>

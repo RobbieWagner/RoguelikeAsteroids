@@ -149,7 +149,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void OnDisable()
         {
-            // Only cleanup if the object is being destroyed, not just disabled
             if (!gameObject.scene.isLoaded)
                 CleanupInputCallbacks();
         }
