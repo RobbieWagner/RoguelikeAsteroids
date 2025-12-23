@@ -27,6 +27,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private float bulletTimeToLive = 2f;
         [SerializeField] private AudioSource fireSound;
 
+        [SerializeField] private Vector2 movementBounds;
+
         private void Awake()
         {
             InputManager.Instance.Controls.GAME.Move.performed += OnMove;
@@ -54,6 +56,18 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             Vector2 moveVector = movementVector;
             moveVector *= speed;
             rb2d.linearVelocity = moveVector;
+            
+            ClampPositionToBounds();
+        }
+
+        private void ClampPositionToBounds()
+        {
+            Vector2 currentPos = transform.position;
+            
+            currentPos.x = Mathf.Clamp(currentPos.x, -movementBounds.x, movementBounds.x);
+            currentPos.y = Mathf.Clamp(currentPos.y, -movementBounds.y, movementBounds.y);
+            
+            transform.position = currentPos;
         }
 
         private void UpdateLook()

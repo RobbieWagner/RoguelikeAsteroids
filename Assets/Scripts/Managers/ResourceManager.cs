@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RobbieWagnerGames.Utilities;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -10,7 +11,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     {
         public Dictionary<ResourceType, int> gatheredResources = new Dictionary<ResourceType, int>();
         [SerializeField] private TextMeshProUGUI resourceText;
-        [SerializeField] private Canvas canvas;
+        [SerializeField] private VerticalLayoutGroup canvas;
         
         [Header("Resource Pip Prefab")]
         [SerializeField] private ResourcePip resourcePipPrefab;
