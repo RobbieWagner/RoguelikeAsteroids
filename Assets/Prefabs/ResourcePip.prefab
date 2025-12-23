@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 9049416671065224706}
   - component: {fileID: 5622480498473282583}
   - component: {fileID: 3939538953409255999}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: ResourcePip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -108,14 +108,6 @@ MonoBehaviour:
   triggerCollider: {fileID: 3939538953409255999}
   rb2d: {fileID: 5622480498473282583}
   drag: 1
-  resourceColors:
-    _serializedList:
-    - Key: 0
-      Value: {r: 0.5882353, g: 0.5882353, b: 0.23529412, a: 1}
-    - Key: 1
-      Value: {r: 0.84313726, g: 0.84313726, b: 0.84313726, a: 1}
-    - Key: 2
-      Value: {r: 0.49019608, g: 0.49019608, b: 0.84313726, a: 1}
 --- !u!50 &5622480498473282583
 Rigidbody2D:
   serializedVersion: 5

@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using RobbieWagnerGames.Managers;
+using RobbieWagnerGames.Utilities;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityExtensionMethods;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
-    public class Player : MonoBehaviour
+    public class Player : MonoBehaviourSingleton<Player>
     {
         [Header("Movement")]
         private Vector2 movementVector = Vector2.zero;
@@ -29,8 +30,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         [SerializeField] private Vector2 movementBounds;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             InputManager.Instance.Controls.GAME.Move.performed += OnMove;
             InputManager.Instance.Controls.GAME.Move.canceled += OnStop;
 
@@ -156,9 +159,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public void DisableControls() => InputManager.Instance.DisableActionMap(ActionMapName.GAME);
         public void EnableControls() => InputManager.Instance.EnableActionMap(ActionMapName.GAME);
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             CleanupInputCallbacks();
+            base.OnDestroy();
         }
 
         private void OnDisable()

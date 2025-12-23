@@ -19,8 +19,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private List<float> scales = new List<float>(){.03f, .065f, .1f};
 
         [SerializeField] private float drag = 1f;
-
-        [SerializedDictionary("Resource","Color")] [SerializeField] private SerializedDictionary<ResourceType, Color> resourceColors = new SerializedDictionary<ResourceType,Color>();
         
         private float timeAlive = 0f;
         
@@ -33,7 +31,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private void SetupVisuals()
         {
-            spriteRenderer.color = resourceColors[resourceType];
+            spriteRenderer.color = GameConstants.Instance.resourceColors[resourceType];
             
             float scale;
             switch(amount)

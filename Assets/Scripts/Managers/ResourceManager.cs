@@ -10,10 +10,14 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     public class ResourceManager : MonoBehaviourSingleton<ResourceManager>
     {
         public Dictionary<ResourceType, int> gatheredResources = new Dictionary<ResourceType, int>();
-        [SerializeField] private TextMeshProUGUI resourceText;
-        [SerializeField] private VerticalLayoutGroup canvas;
         
-        [Header("Resource Pip Prefab")]
+        [Header("Resource UI")]
+        [SerializeField] private LayoutGroup resourcesList;
+        [SerializeField] private ResourceUI resourceUIPrefab;
+        private Dictionary<ResourceType, ResourceUI> activeResourceUIs = new Dictionary<ResourceType, ResourceUI>();
+        [SerializeField] private float highlightDuration = 1f;
+        
+        [Header("Resource Pips")]
         [SerializeField] private ResourcePip resourcePipPrefab;
 
         protected override void Awake() 
@@ -42,29 +46,67 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void InitializeResourceDictionary()
         {
             gatheredResources.Clear();
+            ClearResourceUIs();
 
             foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
             {
                 if (type != ResourceType.NONE)
+                {
                     gatheredResources[type] = 0;
+                    CreateOrUpdateResourceUI(type, 0);
+                }
+            }
+        }
+
+        private void ClearResourceUIs()
+        {
+            foreach (var ui in activeResourceUIs.Values)
+            {
+                if (ui != null && ui.gameObject != null)
+                    Destroy(ui.gameObject);
+            }
+            activeResourceUIs.Clear();
+        }
+
+        private void CreateOrUpdateResourceUI(ResourceType resourceType, int amount)
+        {
+            if (!activeResourceUIs.ContainsKey(resourceType) || activeResourceUIs[resourceType] == null)
+            {
+                if (resourceUIPrefab == null || resourcesList == null)
+                {
+                    Debug.LogError("Resource UI prefab or resources list not assigned!");
+                    return;
+                }
+                
+                ResourceUI newUI = Instantiate(resourceUIPrefab, resourcesList.transform);
+                newUI.Initialize(resourceType, amount);
+                activeResourceUIs[resourceType] = newUI;
+            }
+            else
+            {
+                activeResourceUIs[resourceType].UpdateAmount(amount);
+                
+                if (amount <= 0)
+                    activeResourceUIs[resourceType].gameObject.SetActive(false);
+                else if (!activeResourceUIs[resourceType].gameObject.activeSelf)
+                    activeResourceUIs[resourceType].gameObject.SetActive(true);
             }
         }
 
         private void EnableResourceTracking()
         {
-            canvas.enabled = true;
             ResetResources();
+            resourcesList.gameObject.SetActive(true);
         }
 
         private void DisableResourceTracking()
         {
-            canvas.enabled = false;
+            resourcesList.gameObject.SetActive(false);
         }
 
         public void ResetResources()
         {
             InitializeResourceDictionary();
-            UpdateResourceDisplay();
         }
 
         public void AddResource(ResourceType resourceType, int amount)
@@ -76,7 +118,22 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             else
                 gatheredResources[resourceType] = amount;
             
-            UpdateResourceDisplay();
+            UpdateResourceUI(resourceType);
+        }
+        
+        public void RemoveResource(ResourceType resourceType, int amount)
+        {
+            if (resourceType == ResourceType.NONE || amount <= 0 || 
+                !gatheredResources.ContainsKey(resourceType)) return;
+            
+            gatheredResources[resourceType] = Mathf.Max(0, gatheredResources[resourceType] - amount);
+            UpdateResourceUI(resourceType);
+        }
+        
+        private void UpdateResourceUI(ResourceType resourceType)
+        {
+            if (gatheredResources.TryGetValue(resourceType, out int amount))
+                CreateOrUpdateResourceUI(resourceType, amount);
         }
         
         public void SpawnResourcePips(Vector2 position, ResourceGatherData resourceData, int pipCount = 5)
@@ -118,46 +175,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 pip.Initialize(resourceType, amount);
                 pip.AddRandomForce(UnityEngine.Random.Range(1f, 3f));
             }
-        }
-
-        private void UpdateResourceDisplay()
-        {
-            if (resourceText == null) return;
-            
-            string displayText = "Resources:\n";
-            
-            foreach (var resource in gatheredResources)
-            {
-                if (resource.Key != ResourceType.NONE)
-                    displayText += $"{resource.Key}: {resource.Value}\n";
-            }
-            
-            resourceText.text = displayText;
-        }
-        
-        public int GetTotalResources()
-        {
-            int total = 0;
-            foreach (var resource in gatheredResources)
-            {
-                if (resource.Key != ResourceType.NONE)
-                    total += resource.Value;
-            }
-            return total;
-        }
-        
-        public bool HasResource(ResourceType type, int amount)
-        {
-            return gatheredResources.ContainsKey(type) && gatheredResources[type] >= amount;
-        }
-        
-        public bool SpendResource(ResourceType type, int amount)
-        {
-            if (!HasResource(type, amount)) return false;
-            
-            gatheredResources[type] -= amount;
-            UpdateResourceDisplay();
-            return true;
         }
     }
 }
