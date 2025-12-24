@@ -43,12 +43,6 @@ namespace RobbieWagnerGames.Managers
                 return;
             }
 
-            if (gameObject == null)
-            {
-                Debug.LogWarning("Cannot select null game object", this);
-                return;
-            }
-
             eventSystem.SetSelectedGameObject(gameObject);
         }
 

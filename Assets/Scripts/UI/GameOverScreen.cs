@@ -1,18 +1,15 @@
 using UnityEngine;
-using RobbieWagnerGames.Utilities;
 using UnityEngine.UI;
-using System;
-using RobbieWagnerGames.RoguelikeAsteroids;
 using System.Collections.Generic;
 using TMPro;
 using DG.Tweening;
+using RobbieWagnerGames.UI;
 
-namespace RobbieWagnerGames
+namespace RobbieWagnerGames.RoguelikeAsteroids
 {
-    public class GameOverScreen : MonoBehaviour
+    public class GameOverScreen : Menu
     {
         [Header("Game Over UI")]
-        [SerializeField] private Canvas gameOverScreen;
         [field: SerializeField] public Button retryButton { get; private set; }
         [field: SerializeField] public Button mainMenuButton { get; private set; }
         
@@ -29,14 +26,15 @@ namespace RobbieWagnerGames
         private Dictionary<ResourceType, ResourceUI> displayedResources = new Dictionary<ResourceType, ResourceUI>();
         private Sequence displaySequence;
 
-        private void Awake()
+        protected override void Awake()
         {
-            ToggleGameOverUI(false);
+            base.Awake();
             GameManager.Instance.OnGameOver += OnGameOver;
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
             GameManager.Instance.OnGameOver -= OnGameOver;
             displaySequence?.Kill();
         }
@@ -46,10 +44,9 @@ namespace RobbieWagnerGames
             DisplayGameOverScreen();
         }
 
-
         public void DisplayGameOverScreen()
         {
-            ToggleGameOverUI(true);
+            Open();
             gameOverTitle.text = gameOverTitleText;
             DisplayFinalResources();
         }
@@ -63,6 +60,10 @@ namespace RobbieWagnerGames
                 Debug.LogWarning("No resources to display!");
                 return;
             }
+            
+            foreach (Transform child in resourceUIParent)
+                Destroy(child.gameObject);
+            displayedResources.Clear();
             
             displaySequence?.Kill();
             displaySequence = DOTween.Sequence();
@@ -81,6 +82,15 @@ namespace RobbieWagnerGames
                 
                 delay += resourceDisplayDelay;
             }
+            
+            displaySequence.OnComplete(() =>
+            {
+                retryButton.interactable = true;
+                mainMenuButton.interactable = true;
+                
+                RefreshSelectableElements();
+                SetupNavigation();
+            });
         }
 
         private void DisplayResource(ResourceType resourceType, int amount)
@@ -96,27 +106,37 @@ namespace RobbieWagnerGames
                 .SetEase(Ease.OutBack);
         }
 
+        public override void Open()
+        {
+            base.Open();
+            
+            retryButton.interactable = false;
+            mainMenuButton.interactable = false;
+        }
+
+        public override void Close()
+        {
+            base.Close();
+            displaySequence?.Kill();
+        }
+
+        protected override void SetupNavigation()
+        {
+            if (!retryButton.interactable)
+            {
+                Invoke(nameof(SetupNavigation), 0.1f);
+                return;
+            }
+            
+            base.SetupNavigation();
+        }
+
         public void ToggleGameOverUI(bool on)
         {
-            gameOverScreen.enabled = on;
-            
             if (on)
-            {
-                retryButton.interactable = false;
-                mainMenuButton.interactable = false;
-                
-                retryButton.transform.localScale = Vector3.zero;
-                mainMenuButton.transform.localScale = Vector3.zero;
-                
-                DOVirtual.DelayedCall(1f, () =>
-                {
-                    retryButton.interactable = true;
-                    mainMenuButton.interactable = true;
-                    
-                    retryButton.transform.localScale = Vector3.one;
-                    mainMenuButton.transform.localScale = Vector3.one;
-                });
-            }
+                Open();
+            else
+                Close();
         }
     }
 }

@@ -15,7 +15,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private LayoutGroup resourcesList;
         [SerializeField] private ResourceUI resourceUIPrefab;
         private Dictionary<ResourceType, ResourceUI> activeResourceUIs = new Dictionary<ResourceType, ResourceUI>();
-        [SerializeField] private float highlightDuration = 1f;
         
         [Header("Resource Pips")]
         [SerializeField] private ResourcePip resourcePipPrefab;

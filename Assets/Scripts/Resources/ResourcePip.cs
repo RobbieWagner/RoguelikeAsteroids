@@ -12,7 +12,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private int amount = 1;
         
         [SerializeField] private float lifetime = 10f;
-        [SerializeField] private float pickupRadius = 0.5f;
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private Collider2D triggerCollider;
         [SerializeField] private Rigidbody2D rb2d;
