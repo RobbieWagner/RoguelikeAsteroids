@@ -84,7 +84,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void SpawnAsteroid()
         {
-            Asteroid asteroid = Instantiate(asteroidPrefab);
+            Asteroid asteroid = Instantiate(asteroidPrefab, transform);
             
             Vector2 pos = UnityEngine.Random.insideUnitCircle.normalized * spawnRadius;
             asteroid.transform.position = pos;

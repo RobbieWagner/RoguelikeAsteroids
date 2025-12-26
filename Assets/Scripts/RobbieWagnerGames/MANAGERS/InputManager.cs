@@ -82,7 +82,7 @@ namespace RobbieWagnerGames.Managers
         /// <summary>
         /// Enable a specific action map and optionally disable others
         /// </summary>
-        public void EnableActionMap(ActionMapName mapName, bool disableOthers = true)
+        public void EnableActionMap(ActionMapName mapName, bool disableOthers = false)
         {
             if (disableOthers)
                 DisableAllActionMaps();

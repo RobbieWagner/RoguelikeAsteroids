@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using RobbieWagnerGames.Managers;
+using RobbieWagnerGames.UI;
 using RobbieWagnerGames.Utilities;
 using UnityEngine;
 
@@ -10,6 +12,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public event Action OnGameStart;
         public event Action OnGameOver;
         public event Action OnReturnToMenu;
+
+        private bool isGamePaused = false;
+        public bool IsGamePaused => isGamePaused;
+        
+        public event Action OnGamePaused;
+        public event Action OnGameResumed;
         
         private Coroutine sceneTransitionCo = null;
 
@@ -33,7 +41,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private IEnumerator StartGameCo()
         {
             yield return SceneLoadManager.Instance.UnloadScene("MenuScene");
-            yield return SceneLoadManager.Instance.LoadSceneAdditive("GameScene");
+            yield return SceneLoadManager.Instance.LoadSceneAdditive("GameScene", () => {InputManager.Instance.EnableActionMap(ActionMapName.PAUSE);});
             OnGameStart?.Invoke();
 
             sceneTransitionCo = null;
@@ -48,7 +56,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private IEnumerator RestartGameCo()
         {
             yield return SceneLoadManager.Instance.UnloadScene("GameScene");
-            yield return SceneLoadManager.Instance.LoadSceneAdditive("GameScene");
+            yield return SceneLoadManager.Instance.LoadSceneAdditive("GameScene", () => {InputManager.Instance.EnableActionMap(ActionMapName.PAUSE);});
             OnGameStart?.Invoke();
             
             sceneTransitionCo = null;
@@ -62,10 +70,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private IEnumerator ReturnToMenuCo()
         {
+            Debug.Log("hi");
             yield return SceneLoadManager.Instance.UnloadScene("GameScene");
             OnReturnToMenu?.Invoke();
             
-            yield return SceneLoadManager.Instance.LoadSceneAdditive("MenuScene");
+            yield return SceneLoadManager.Instance.LoadSceneAdditive("MenuScene", () => {InputManager.Instance.DisableActionMap(ActionMapName.PAUSE);});
             sceneTransitionCo = null;
         }
 
@@ -77,6 +86,36 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public void NotifyGameOver()
         {
             OnGameOver?.Invoke();
+        }
+
+        public void PauseGame()
+        {
+            if (isGamePaused) return;
+            
+            isGamePaused = true;
+            OnGamePaused?.Invoke();
+            
+            if (PauseMenu.Instance != null)
+                PauseMenu.Instance.PauseGame();
+        }
+        
+        public void ResumeGame()
+        {
+            if (!isGamePaused) return;
+            
+            isGamePaused = false;
+            OnGameResumed?.Invoke();
+            
+            if (PauseMenu.Instance != null)
+                PauseMenu.Instance.ResumeGame();
+        }
+        
+        public void TogglePause()
+        {
+            if (isGamePaused)
+                ResumeGame();
+            else
+                PauseGame();
         }
     }
 }

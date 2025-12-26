@@ -1,10 +1,9 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using RobbieWagnerGames.Managers;
-using System;
 using System.Collections;
+using UnityEngine.InputSystem;
 
 namespace RobbieWagnerGames.UI
 {
@@ -147,7 +146,7 @@ namespace RobbieWagnerGames.UI
         {
             if (!isUsingController || !canNavigateWithController || selectableElements.Count == 0) return;
             
-            var navigateAction = InputManager.Instance.GetAction(ActionMapName.UI, "Navigate");
+            InputAction navigateAction = InputManager.Instance.GetAction(ActionMapName.UI, "Navigate");
             if (navigateAction != null)
             {
                 Vector2 input = navigateAction.ReadValue<Vector2>();
@@ -163,11 +162,11 @@ namespace RobbieWagnerGames.UI
                 
                 lastControllerInput = input;
                 
-                var submitAction = InputManager.Instance.GetAction(ActionMapName.UI, "Submit");
+                InputAction submitAction = InputManager.Instance.GetAction(ActionMapName.UI, "Submit");
                 if (submitAction != null && submitAction.WasPressedThisFrame())
                     HandleSubmit();
                 
-                var cancelAction = InputManager.Instance.GetAction(ActionMapName.UI, "Cancel");
+                InputAction cancelAction = InputManager.Instance.GetAction(ActionMapName.UI, "Cancel");
                 if (cancelAction != null && cancelAction.WasPressedThisFrame())
                     HandleCancel();
             }
@@ -176,9 +175,8 @@ namespace RobbieWagnerGames.UI
         protected virtual void HandleMouseNavigation()
         {
             if (isUsingController) return;
-            
-            var pointAction = InputManager.Instance.GetAction(ActionMapName.UI, "Point");
-            var clickAction = InputManager.Instance.GetAction(ActionMapName.UI, "Click");
+
+            InputAction clickAction = InputManager.Instance.GetAction(ActionMapName.UI, "Click");
             
             if (clickAction != null && clickAction.WasPressedThisFrame())
                 HandleMouseClick();
@@ -201,7 +199,7 @@ namespace RobbieWagnerGames.UI
             
             SetupNavigation();
             StartSelectionMaintenance();
-            
+
             OnOpened();
         }
         
@@ -354,7 +352,7 @@ namespace RobbieWagnerGames.UI
             if (element == EventSystemManager.Instance.CurrentSelected)
                 yield break;
 
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForSecondsRealtime(.01f);
             
             EventSystemManager.Instance.SetSelected(element.gameObject);
             forcedSelectionObject = element.gameObject;
@@ -541,7 +539,7 @@ namespace RobbieWagnerGames.UI
         
         private IEnumerator RestoreSelectionAfterFocus()
         {
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForSecondsRealtime(.01f);
             
             isUsingController = true;
             RestoreOrSetDefaultSelection();
