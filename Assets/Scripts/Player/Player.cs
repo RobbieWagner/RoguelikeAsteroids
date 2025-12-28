@@ -153,7 +153,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void OnPlayerKilled()
         {
             DisableControls();
-            GameManager.Instance.NotifyGameOver();
+            LevelManager.Instance.NotifyPlayerDeath();
         }
 
         public void DisableControls() => InputManager.Instance.DisableActionMap(ActionMapName.GAME);

@@ -29,17 +29,27 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected override void Awake()
         {
             base.Awake();
-            GameManager.Instance.OnGameOver += OnGameOver;
+            RunManager.Instance.OnRunFailed += OnGameOver;
+            
+            if (retryButton != null)
+                retryButton.onClick.AddListener(OnRetryClicked);
+            
+            if (mainMenuButton != null)
+                mainMenuButton.onClick.AddListener(OnMainMenuClicked);
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            GameManager.Instance.OnGameOver -= OnGameOver;
+            RunManager.Instance.OnRunFailed -= OnGameOver;
             displaySequence?.Kill();
+            
+            retryButton.onClick.RemoveListener(OnRetryClicked);
+        
+            mainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
         }
 
-        private void OnGameOver()
+        private void OnGameOver(Run run = null)
         {
             DisplayGameOverScreen();
         }
@@ -137,6 +147,18 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 Open();
             else
                 Close();
+        }
+
+        private void OnRetryClicked()
+        {
+            if (LevelManager.Instance != null)
+                LevelManager.Instance.HandleRetry();
+        }
+
+        private void OnMainMenuClicked()
+        {
+            if (LevelManager.Instance != null)
+                LevelManager.Instance.HandleMainMenu();
         }
     }
 }

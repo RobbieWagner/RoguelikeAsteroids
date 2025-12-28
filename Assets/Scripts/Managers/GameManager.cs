@@ -10,7 +10,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     public class GameManager : MonoBehaviourSingleton<GameManager>
     {
         public event Action OnGameStart;
-        public event Action OnGameOver;
         public event Action OnReturnToMenu;
 
         private bool isGamePaused = false;
@@ -41,10 +40,14 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private IEnumerator StartGameCo()
         {
             yield return SceneLoadManager.Instance.UnloadScene("MenuScene");
-            yield return SceneLoadManager.Instance.LoadSceneAdditive("GameScene", () => {InputManager.Instance.EnableActionMap(ActionMapName.PAUSE);});
-            OnGameStart?.Invoke();
-
+            yield return SceneLoadManager.Instance.LoadSceneAdditive("RunScene", () => { InvokeGameStartEvent(); });
             sceneTransitionCo = null;
+        }
+
+        private void InvokeGameStartEvent()
+        {
+            InputManager.Instance.EnableActionMap(ActionMapName.PAUSE);
+            OnGameStart?.Invoke();
         }
 
         public void RestartGame()
@@ -55,10 +58,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private IEnumerator RestartGameCo()
         {
-            yield return SceneLoadManager.Instance.UnloadScene("GameScene");
-            yield return SceneLoadManager.Instance.LoadSceneAdditive("GameScene", () => {InputManager.Instance.EnableActionMap(ActionMapName.PAUSE);});
-            OnGameStart?.Invoke();
-            
+            yield return SceneLoadManager.Instance.UnloadScene("RunScene");
+            yield return SceneLoadManager.Instance.LoadSceneAdditive("RunScene", () => { InvokeGameStartEvent(); });
             sceneTransitionCo = null;
         }
 
@@ -70,22 +71,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private IEnumerator ReturnToMenuCo()
         {
-            Debug.Log("hi");
-            yield return SceneLoadManager.Instance.UnloadScene("GameScene");
+            yield return SceneLoadManager.Instance.UnloadScene("RunScene", false);
+            yield return SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, false, null, false);
             OnReturnToMenu?.Invoke();
             
             yield return SceneLoadManager.Instance.LoadSceneAdditive("MenuScene", () => {InputManager.Instance.DisableActionMap(ActionMapName.PAUSE);});
             sceneTransitionCo = null;
-        }
-
-        public void ReloadGame()
-        {
-            RestartGame();
-        }
-
-        public void NotifyGameOver()
-        {
-            OnGameOver?.Invoke();
         }
 
         public void PauseGame()
@@ -106,8 +97,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             isGamePaused = false;
             OnGameResumed?.Invoke();
             
-            if (PauseMenu.Instance != null)
-                PauseMenu.Instance.ResumeGame();
+            PauseMenu.Instance.ResumeGame();
         }
         
         public void TogglePause()
