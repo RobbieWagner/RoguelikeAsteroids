@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using RobbieWagnerGames.Managers;
 using RobbieWagnerGames.Utilities;
@@ -11,9 +10,14 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     public class Player : MonoBehaviourSingleton<Player>
     {
         [Header("Movement")]
-        private Vector2 movementVector = Vector2.zero;
+        private Vector2 movementInput = Vector2.zero;
         [SerializeField] private float speed = 5;
         [SerializeField] private Rigidbody2D rb2d;
+        
+        [Header("Movement Smoothing")]
+        [SerializeField] private float acceleration = 10f;
+        [SerializeField] private float deceleration = 15f;
+        [SerializeField] private float currentSpeed = 0f;
         
         [Header("Look")]
         [SerializeField] private Transform lookAtTarget;        
@@ -36,12 +40,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             InputManager.Instance.Controls.GAME.Move.performed += OnMove;
             InputManager.Instance.Controls.GAME.Move.canceled += OnStop;
-
             InputManager.Instance.Controls.GAME.ControllerLook.performed += OnControllerLook;
             InputManager.Instance.Controls.GAME.ControllerLook.canceled += OnControllerLookCanceled;
-
             InputManager.Instance.Controls.GAME.MousePosition.performed += OnMouseDelta;
-
             InputManager.Instance.Controls.GAME.Shoot.performed += OnShoot;
 
             EnableControls();
@@ -56,9 +57,24 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void UpdateMovement()
         {
-            Vector2 moveVector = movementVector;
-            moveVector *= speed;
-            rb2d.linearVelocity = moveVector;
+            float targetSpeed = movementInput.magnitude > 0.1f ? speed : 0f;
+            
+            if (targetSpeed > currentSpeed)
+                currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.deltaTime);
+            else if (targetSpeed < currentSpeed)
+                currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
+       
+            if (currentSpeed > 0.01f)
+            {
+                Vector2 moveDirection = movementInput.magnitude > 0 ? movementInput.normalized : rb2d.linearVelocity.normalized;
+                Vector2 targetVelocity = moveDirection * currentSpeed;
+                rb2d.linearVelocity = targetVelocity;
+            }
+            else
+            {
+                rb2d.linearVelocity = Vector2.zero;
+                currentSpeed = 0f;
+            }
             
             ClampPositionToBounds();
         }
@@ -86,12 +102,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void OnMove(InputAction.CallbackContext context)
         {
-            movementVector = context.ReadValue<Vector2>();
+            movementInput = context.ReadValue<Vector2>();
         }
 
         private void OnStop(InputAction.CallbackContext context)
         {
-            movementVector = Vector2.zero;
+            movementInput = Vector2.zero;
         }
         
         private void OnControllerLook(InputAction.CallbackContext context)

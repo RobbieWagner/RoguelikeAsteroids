@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using AYellowpaper.SerializedCollections;
+using RobbieWagnerGames.Managers;
 using RobbieWagnerGames.Utilities;
 using UnityEngine;
 
@@ -145,11 +146,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             Level level = currentRun.CurrentLevel;
         
             yield return SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, false, null, false);
-            yield return SceneLoadManager.Instance.LoadSceneAdditive(level.sceneToLoad, () => {OnStartNextLevel?.Invoke(level);});
+            yield return SceneLoadManager.Instance.LoadSceneAdditive(level.sceneToLoad, true, () => {OnStartNextLevel?.Invoke(level);});
         }
 
         public void CompleteCurrentLevel()
         {
+            InputManager.Instance.DisableActionMap(ActionMapName.GAME);
+
             if (currentRun == null || currentRun.IsComplete) return;
             
             Level level = currentRun.CurrentLevel;
@@ -160,10 +163,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             if (currentRun.IsComplete)
                 EndRun(true);
             else
-                ShowRunMenu();
+                StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => {ShowRunMenu();}));
         }
 
-        public void FailCurrentLevel()
+        public void FailRun()
         {
             if (currentRun == null) return;
             
@@ -179,31 +182,23 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             OnRunEnded?.Invoke(completedRun);
         }
 
-        public void ReturnToMainMenu()
-        {
-            currentRun = null;
-            OnHideRunMenu?.Invoke();
-            GameManager.Instance.ReturnToMenu();
-        }
-
         private void ShowRunMenu()
         {
             OnShowRunMenu?.Invoke();
         }
 
         private Coroutine returnToMenuCo = null;
-        public void ReturnToMenu()
+        public void ReturnToMainMenu()
         {
             if(returnToMenuCo != null) return;
-
-            returnToMenuCo = StartCoroutine(SceneLoadManager.Instance.UnloadScene("AsteroidsScene", true, () => {GameManager.Instance.ReturnToMenu();}, false));
+            OnHideRunMenu?.Invoke();
+            returnToMenuCo = StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => {GameManager.Instance.ReturnToMenu();}, false));
         }
 
         public void RestartGame()
         {
             if(returnToMenuCo != null) return;
-
-            returnToMenuCo = StartCoroutine(SceneLoadManager.Instance.UnloadScene("AsteroidsScene", true, () => {GameManager.Instance.RestartGame();}, false));
+            returnToMenuCo = StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => {GameManager.Instance.RestartGame();}, false));
         }
 
         protected override void OnDestroy()

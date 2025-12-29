@@ -12,9 +12,10 @@ namespace RobbieWagnerGames.Utilities
     {
         private List<string> loadedScenes = new List<string>();
 
-        public IEnumerator LoadSceneAdditive(string sceneName, Action callback = null)
+        public IEnumerator LoadSceneAdditive(string sceneName, bool coverScreen = true, Action callback = null)
         {
-            yield return StartCoroutine(ScreenCover.Instance.FadeCoverIn());
+            if (coverScreen)
+                yield return StartCoroutine(ScreenCover.Instance.FadeCoverIn());
             
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
             
@@ -26,7 +27,8 @@ namespace RobbieWagnerGames.Utilities
             
             callback?.Invoke();
             
-            yield return StartCoroutine(ScreenCover.Instance.FadeCoverOut());
+            if (coverScreen)
+                yield return StartCoroutine(ScreenCover.Instance.FadeCoverOut());
         }
 
         public IEnumerator UnloadScene(string sceneName, bool coverScreen = true, Action callback = null, bool errorOnFail = true)
@@ -36,7 +38,10 @@ namespace RobbieWagnerGames.Utilities
                 if (errorOnFail)
                     throw new ArgumentException($"Scene '{sceneName}' is not loaded.");
                 else
+                {
+                    callback?.Invoke();
                     yield break;
+                }
             }
 
             if (coverScreen)
@@ -64,7 +69,10 @@ namespace RobbieWagnerGames.Utilities
                 if (errorOnFail)
                     throw new ArgumentException("None of the listed scenes are loaded.");
                 else
+                {
+                    callback?.Invoke();
                     yield break;
+                }
             }
 
             if (coverScreen)

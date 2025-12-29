@@ -114,47 +114,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             spawnedShootables.Add(asteroid);
         }
 
-        public void SpawnResourcePips(Transform parent, ResourceGatherData resourceData, int pipCount = 5)
-        {
-            if (resourcePipPrefab == null || resourceData == null || resourceData.resources == null) return;
-            
-            foreach (KeyValuePair<ResourceType, int> resource in resourceData.resources)
-            {
-                if (resource.Key == ResourceType.NONE || resource.Value <= 0) continue;
-                
-                int remainingAmount = resource.Value;
-
-                while (remainingAmount >= 10)
-                {
-                    SpawnPip(parent, resource.Key, 10);
-                    remainingAmount -= 10;
-                }
-                
-                while (remainingAmount >= 5)
-                {
-                    SpawnPip(parent, resource.Key, 5);
-                    remainingAmount -= 5;
-                }
-                
-                while (remainingAmount > 0)
-                {
-                    SpawnPip(parent, resource.Key, 1);
-                    remainingAmount -= 1;
-                }
-            }
-        }
-
-        private void SpawnPip(Transform parent, ResourceType resourceType, int amount)
-        {
-            ResourcePip pip = Instantiate(resourcePipPrefab, parent.position, Quaternion.identity, transform);
-            
-            if (pip != null)
-            {
-                pip.Initialize(resourceType, amount);
-                pip.AddRandomForce(UnityEngine.Random.Range(1f, 3f));
-            }
-        }
-
         private void HandleShootableDestroyed(Shootable shootable, DestructionReason reason)
         {
             shootable.OnShootableDestroyed -= HandleShootableDestroyed;

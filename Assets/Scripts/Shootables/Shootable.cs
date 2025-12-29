@@ -47,7 +47,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         protected virtual void SpawnResourcePips()
         {
-            ShootableManager.Instance.SpawnResourcePips(transform, resourceData);
+            PipController.Instance.SpawnResourcePips(transform, resourceData);
         }
 
         public void Initialize(float speed, Vector2 direction, float newBoundsRadius)

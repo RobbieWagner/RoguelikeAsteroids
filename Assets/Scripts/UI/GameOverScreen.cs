@@ -18,24 +18,20 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private ResourceUI resourceUIPrefab;
         [SerializeField] private float resourceDisplayDelay = 0.2f;
         [SerializeField] private float animationDuration = 0.5f;
+        private Dictionary<ResourceType, ResourceUI> displayedResources = new Dictionary<ResourceType, ResourceUI>();
+        private Sequence displaySequence;
         
         [Header("Game Over Text")]
         [SerializeField] private TextMeshProUGUI gameOverTitle;
-        [SerializeField] private string gameOverTitleText = "GAME OVER";
+        [SerializeField] private string gameOverTitleText = "Run Failed";
         
-        private Dictionary<ResourceType, ResourceUI> displayedResources = new Dictionary<ResourceType, ResourceUI>();
-        private Sequence displaySequence;
-
         protected override void Awake()
         {
             base.Awake();
             RunManager.Instance.OnRunFailed += OnGameOver;
             
-            if (retryButton != null)
-                retryButton.onClick.AddListener(OnRetryClicked);
-            
-            if (mainMenuButton != null)
-                mainMenuButton.onClick.AddListener(OnMainMenuClicked);
+            retryButton.onClick.AddListener(OnRetryClicked);
+            mainMenuButton.onClick.AddListener(OnMainMenuClicked);
         }
 
         protected override void OnDestroy()
@@ -45,7 +41,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             displaySequence?.Kill();
             
             retryButton.onClick.RemoveListener(OnRetryClicked);
-        
             mainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
         }
 
@@ -64,7 +59,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void DisplayFinalResources()
         {
             Dictionary<ResourceType, int> finalResources = ResourceManager.Instance.gatheredResources;
-            
             if (finalResources == null || finalResources.Count == 0)
             {
                 Debug.LogWarning("No resources to display!");
@@ -80,7 +74,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             float delay = 0f;
             int totalResources = 0;
-            
             foreach (var resource in finalResources)
             {
                 if (resource.Key == ResourceType.NONE || resource.Value <= 0) continue;
@@ -141,24 +134,16 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             base.SetupNavigation();
         }
 
-        public void ToggleGameOverUI(bool on)
-        {
-            if (on)
-                Open();
-            else
-                Close();
-        }
-
         private void OnRetryClicked()
         {
-            if (LevelManager.Instance != null)
-                LevelManager.Instance.HandleRetry();
+            Close();
+            RunManager.Instance.RestartGame();
         }
 
         private void OnMainMenuClicked()
         {
-            if (LevelManager.Instance != null)
-                LevelManager.Instance.HandleMainMenu();
+            Close();
+            RunManager.Instance.ReturnToMainMenu();
         }
     }
 }

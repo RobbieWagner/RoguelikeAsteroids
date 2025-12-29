@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using RobbieWagnerGames.Utilities;
 using TMPro;
 using UnityEngine.InputSystem;
+using System;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -18,12 +19,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         [Header("Level Info")]
         [SerializeField] private TextMeshProUGUI levelText;
-        [SerializeField] private TextMeshProUGUI scoreText;
-        [SerializeField] private TextMeshProUGUI timerText;
+        [SerializeField] private Slider timeSlider;
+        [SerializeField] private Image timeSliderFill;
         
         private Dictionary<ResourceType, ResourceUI> activeResourceUIs = new Dictionary<ResourceType, ResourceUI>();
-        private float levelTimer = 0f;
-        private bool isTimerRunning = false;
         
         protected override void Awake()
         {
@@ -39,25 +38,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             RunManager.Instance.OnStartNextLevel += OnLevelStarted;
             LevelManager.Instance.OnLevelCompleted += OnLevelCompleted;
             LevelManager.Instance.OnLevelFailed += OnLevelFailed;
+            LevelManager.Instance.LevelTimer.OnTimerUpdate += UpdateLevelTimer;
+            LevelManager.Instance.LevelTimer.OnTimerComplete += CompleteLevelTimer;
 
             GameManager.Instance.OnReturnToMenu += HideHUD;
             GameManager.Instance.OnGameStart += ShowHUD;
-        }
-
-        private void Update()
-        {
-            if (isTimerRunning)
-            {
-                levelTimer -= Time.deltaTime;
-                UpdateTimerDisplay();
-                
-                if (levelTimer <= 0f)
-                {
-                    isTimerRunning = false;
-                    levelTimer = 0f;
-                    UpdateTimerDisplay();
-                }
-            }
         }
         
         private void InitializeResourceUI()
@@ -66,7 +51,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             if (showAllResources)
             {
-                foreach (ResourceType type in System.Enum.GetValues(typeof(ResourceType)))
+                foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
                 {
                     if (type != ResourceType.NONE)
                         CreateResourceUI(type, 0);
@@ -148,7 +133,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             }
             else
             {
-                foreach (ResourceType type in System.Enum.GetValues(typeof(ResourceType)))
+                foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
                 {
                     if (type != ResourceType.NONE)
                     {
@@ -165,41 +150,42 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 return ResourceManager.Instance.gatheredResources[resourceType];
             return 0;
         }
+
+        private void UpdateLevelTimer(float time)
+        {
+            timeSlider.value = time;
+        }
+
+        private void CompleteLevelTimer()
+        {
+            timeSliderFill.color = Color.white;
+        }
         
         private void OnLevelStarted(Level level)
         {
 			if (level.levelDuration > 0)
 			{
-				levelTimer = level.levelDuration;
-				isTimerRunning = true;
+				timeSlider.minValue = 0;
+                timeSlider.maxValue = level.levelDuration;
+                timeSlider.value = 0;
+                timeSlider.gameObject.SetActive(true);
 			}
 			else
 			{
-				isTimerRunning = false;
-				timerText.text = "--:--";
+				timeSlider.gameObject.SetActive(false);
 			}
+
+            levelText.text = level.levelType.ToString();
         }
 
         private void OnLevelFailed(Level level)
         {
-            isTimerRunning = false;
             HideHUD();
         }
         
         private void OnLevelCompleted(Level level)
         {
-            isTimerRunning = false;
             HideHUD();
-        }
-        
-        private void UpdateTimerDisplay()
-        {
-            if (timerText != null)
-            {
-                int minutes = Mathf.FloorToInt(levelTimer / 60);
-                int seconds = Mathf.FloorToInt(levelTimer % 60);
-                timerText.text = $"{minutes:00}:{seconds:00}";
-            }
         }
         
         public void ShowHUD()
@@ -225,6 +211,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             RunManager.Instance.OnStartNextLevel -= OnLevelStarted;
             LevelManager.Instance.OnLevelCompleted -= OnLevelCompleted;
+            LevelManager.Instance.OnLevelFailed -= OnLevelFailed;
+            LevelManager.Instance.LevelTimer.OnTimerUpdate -= UpdateLevelTimer;
+            LevelManager.Instance.LevelTimer.OnTimerComplete -= CompleteLevelTimer;
 
             GameManager.Instance.OnReturnToMenu -= HideHUD;
             GameManager.Instance.OnGameStart -= ShowHUD;

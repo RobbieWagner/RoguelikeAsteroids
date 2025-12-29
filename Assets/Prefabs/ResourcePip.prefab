@@ -103,11 +103,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lifetime: 10
-  pickupRadius: 0.5
   spriteRenderer: {fileID: 5145303032616542073}
   triggerCollider: {fileID: 3939538953409255999}
   rb2d: {fileID: 5622480498473282583}
   drag: 1
+  collectionRadius: 0.1
+  magnetSpeed: 8
 --- !u!50 &5622480498473282583
 Rigidbody2D:
   serializedVersion: 5
@@ -179,5 +180,5 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.1, y: 0.1}
   m_EdgeRadius: 0

@@ -130,7 +130,7 @@ namespace RobbieWagnerGames.UI
             Close();
             isPaused = false;
 
-			RunManager.Instance.ReturnToMenu();
+			RunManager.Instance.ReturnToMainMenu();
         }
 
 		private void QuitApplication()

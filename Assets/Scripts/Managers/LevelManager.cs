@@ -8,23 +8,25 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     {
         private Level level = null;
         public Level Level => level;
-
-        [SerializeField] private GameOverScreen gameOverScreen;
         
         private bool isLevelActive => level != null;
 
         public event Action<Level> OnLevelStarted;
         public event Action<Level> OnLevelCompleted;
         public event Action<Level> OnLevelFailed;
+
+        [SerializeField] private Timer levelTimer;
+        public Timer LevelTimer => levelTimer;
         
         protected override void Awake()
         {
             base.Awake();
             
             RunManager.Instance.OnStartNextLevel += StartNextLevel;
-            RunManager.Instance.OnRunFailed += OnRunFailed;
             
             GameManager.Instance.OnReturnToMenu += OnReturnedToMenu;
+
+            levelTimer.OnTimerComplete += OnLevelTimerComplete;
         }
 
         private void OnReturnedToMenu()
@@ -37,22 +39,15 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             this.level = level;
             
             ConfigureLevel(level);
+            if (level.levelDuration > 0)
+                levelTimer.StartTimer(level.levelDuration);
             OnLevelStarted?.Invoke(level);
         }
 
-        public void CompleteLevel(Level level)
+        private void FailLevel()
         {
-            //TODO: call from somewhere
-            level = null;
-            OnLevelCompleted?.Invoke(level);
-            RunManager.Instance.CompleteCurrentLevel();
-        }
-
-        private void OnRunFailed(Run run)
-        {
-            level = null;
-            
-            gameOverScreen.ToggleGameOverUI(true);
+            StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"},true,() => {RunManager.Instance.FailRun();},false));
+            OnLevelFailed?.Invoke(level);
         }
 
         private void ConfigureLevel(Level level)
@@ -73,8 +68,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void ConfigureAsteroidLevel(Level level)
         {
-            if (ShootableManager.Instance != null)
-                ShootableManager.Instance.ConfigureForLevel(level);
+            ShootableManager.Instance.ConfigureForLevel(level);
         }
 
         private void ConfigureShopLevel()
@@ -87,10 +81,16 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             throw new NotImplementedException(); // TODO: add boss level implementation
         }
 
-        public void LevelComplete(int score, int resources)
+        private void OnLevelTimerComplete()
+        {
+            LevelComplete();
+        }
+
+        public void LevelComplete()
         {
             if (!isLevelActive) return;
             
+            OnLevelCompleted?.Invoke(level);
             level = null;
             RunManager.Instance.CompleteCurrentLevel();
         }
@@ -100,36 +100,16 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             if (!isLevelActive) return;
             
             level = null;
-            OnLevelFailed?.Invoke(level);
-            RunManager.Instance.FailCurrentLevel();
-        }
-
-        public void HandleRetry()
-        {
-            if (gameOverScreen != null)
-                gameOverScreen.ToggleGameOverUI(false);
-            RunManager.Instance.RestartGame();
-        }
-
-        public void HandleMainMenu()
-        {
-            if (gameOverScreen != null)
-                gameOverScreen.ToggleGameOverUI(false);
-            RunManager.Instance.ReturnToMainMenu();
+            levelTimer.StopTimer();
+            FailLevel();
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            
-            if (RunManager.Instance != null)
-            {
-                RunManager.Instance.OnStartNextLevel -= StartNextLevel;
-                RunManager.Instance.OnRunFailed -= OnRunFailed;
-            }
-            
-            if (GameManager.Instance != null)
-                GameManager.Instance.OnReturnToMenu -= OnReturnedToMenu;
+
+            RunManager.Instance.OnStartNextLevel -= StartNextLevel;
+            GameManager.Instance.OnReturnToMenu -= OnReturnedToMenu;
         }
     }
 }
