@@ -14,24 +14,23 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		
 		public event Action<ResourcePip> OnPipCollected;
 		public event Action OnAllPipsCleared;
+
+		[SerializeField] private AsteroidsLevelController levelController;
 		
 		protected override void Awake()
 		{
 			base.Awake();
 			
-			LevelManager.Instance.OnLevelFailed += ClearAllPips;
-			LevelManager.Instance.OnLevelCompleted += ClearAllPips;
+			levelController.OnLevelFailed += ClearAllPips;
+			levelController.OnLevelCompleted += ClearAllPips;
 		}
 		
 		protected override void OnDestroy()
 		{
 			base.OnDestroy();
 			
-			if (LevelManager.Instance != null)
-			{
-				LevelManager.Instance.OnLevelFailed -= ClearAllPips;
-				LevelManager.Instance.OnLevelCompleted -= ClearAllPips;
-			}
+			levelController.OnLevelFailed -= ClearAllPips;
+			levelController.OnLevelCompleted -= ClearAllPips;
 			
 			ClearAllPips();
 		}
@@ -110,7 +109,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 			}
 		}
 		
-		public void ClearAllPips(Level level = null)
+		public void ClearAllPips()
 		{
 			foreach (var pip in activePips)
 			{

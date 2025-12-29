@@ -9,6 +9,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 {
     public class ShootableManager : MonoBehaviourSingleton<ShootableManager>
     {
+        [SerializeField] private AsteroidsLevelController levelController;
+
         [Header("Asteroid Spawning")]
         [SerializeField] private Asteroid asteroidPrefab;
         [SerializeField] private int maxAsteroids = 10;
@@ -28,22 +30,23 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         public event Action<Shootable, DestructionReason> ShootableDestroyedEvent;
 
+
         protected override void Awake()
         {
             base.Awake();
             
-            LevelManager.Instance.OnLevelStarted += ConfigureForLevel;
-            LevelManager.Instance.OnLevelFailed += StopAndClearAllShootables;
-            LevelManager.Instance.OnLevelCompleted += StopAndClearAllShootables;
+            levelController.OnLevelStarted += StartAsteroidSpawner;
+            levelController.OnLevelFailed += StopAndClearAllShootables;
+            levelController.OnLevelCompleted += StopAndClearAllShootables;
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
             
-            LevelManager.Instance.OnLevelStarted -= ConfigureForLevel;
-            LevelManager.Instance.OnLevelFailed -= StopAndClearAllShootables;
-            LevelManager.Instance.OnLevelCompleted -= StopAndClearAllShootables;
+            levelController.OnLevelStarted -= StartAsteroidSpawner;
+            levelController.OnLevelFailed -= StopAndClearAllShootables;
+            levelController.OnLevelCompleted -= StopAndClearAllShootables;
             
             foreach (var shootable in spawnedShootables)
             {
@@ -57,15 +60,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             maxAsteroids = level.asteroidCount;
             spawnCooldown = level.asteroidSpawnRate;
             speedRange = level.asteroidSpeedRange;
-            
-            //StopAndClearAllShootables();
-            StartAsteroidSpawner();
         }
 
         public void StartAsteroidSpawner()
         {
             if(!isActive && asteroidSpawnCoroutine == null)
             {
+                ConfigureForLevel(levelController.levelDetails);
                 isActive = true;
                 asteroidSpawnCoroutine = StartCoroutine(RunAsteroidSpawner());
             }
@@ -137,7 +138,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             }
         }
 
-        private void StopAndClearAllShootables(Level level = null)
+        private void StopAndClearAllShootables()
         {
             StopAsteroidSpawner();
             ClearAllShootables();

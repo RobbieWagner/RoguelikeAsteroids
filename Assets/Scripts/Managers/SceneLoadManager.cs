@@ -24,6 +24,8 @@ namespace RobbieWagnerGames.Utilities
             
             if (!loadedScenes.Contains(sceneName))
                 loadedScenes.Add(sceneName);
+
+            yield return null;
             
             callback?.Invoke();
             

@@ -18,6 +18,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private bool hideEmptyResources = true;
         
         [Header("Level Info")]
+        [SerializeField] private AsteroidsLevelController levelController;
         [SerializeField] private TextMeshProUGUI levelText;
         [SerializeField] private Slider timeSlider;
         [SerializeField] private Image timeSliderFill;
@@ -35,11 +36,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             ResourceManager.Instance.OnResourcesReset += OnResourcesReset;
             ResourceManager.Instance.OnResourcesUpdated += OnResourcesUpdated;
 
-            RunManager.Instance.OnStartNextLevel += OnLevelStarted;
-            LevelManager.Instance.OnLevelCompleted += OnLevelCompleted;
-            LevelManager.Instance.OnLevelFailed += OnLevelFailed;
-            LevelManager.Instance.LevelTimer.OnTimerUpdate += UpdateLevelTimer;
-            LevelManager.Instance.LevelTimer.OnTimerComplete += CompleteLevelTimer;
+            levelController.OnLevelStarted += OnLevelStarted;
+            levelController.OnLevelCompleted += OnLevelCompleted;
+            levelController.OnLevelFailed += OnLevelFailed;
+            levelController.LevelTimer.OnTimerUpdate += UpdateLevelTimer;
+            levelController.LevelTimer.OnTimerComplete += CompleteLevelTimer;
 
             GameManager.Instance.OnReturnToMenu += HideHUD;
             GameManager.Instance.OnGameStart += ShowHUD;
@@ -161,8 +162,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             timeSliderFill.color = Color.white;
         }
         
-        private void OnLevelStarted(Level level)
+        private void OnLevelStarted()
         {
+            Level level = levelController.levelDetails;
+
 			if (level.levelDuration > 0)
 			{
 				timeSlider.minValue = 0;
@@ -178,12 +181,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             levelText.text = level.levelType.ToString();
         }
 
-        private void OnLevelFailed(Level level)
+        private void OnLevelFailed()
         {
             HideHUD();
         }
         
-        private void OnLevelCompleted(Level level)
+        private void OnLevelCompleted()
         {
             HideHUD();
         }
@@ -209,11 +212,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             ResourceManager.Instance.OnResourcesReset -= OnResourcesReset;
             ResourceManager.Instance.OnResourcesUpdated -= OnResourcesUpdated;
 
-            RunManager.Instance.OnStartNextLevel -= OnLevelStarted;
-            LevelManager.Instance.OnLevelCompleted -= OnLevelCompleted;
-            LevelManager.Instance.OnLevelFailed -= OnLevelFailed;
-            LevelManager.Instance.LevelTimer.OnTimerUpdate -= UpdateLevelTimer;
-            LevelManager.Instance.LevelTimer.OnTimerComplete -= CompleteLevelTimer;
+            levelController.OnLevelStarted -= OnLevelStarted;
+            levelController.OnLevelCompleted -= OnLevelCompleted;
+            levelController.OnLevelFailed -= OnLevelFailed;
+            levelController.LevelTimer.OnTimerUpdate -= UpdateLevelTimer;
+            levelController.LevelTimer.OnTimerComplete -= CompleteLevelTimer;
 
             GameManager.Instance.OnReturnToMenu -= HideHUD;
             GameManager.Instance.OnGameStart -= ShowHUD;

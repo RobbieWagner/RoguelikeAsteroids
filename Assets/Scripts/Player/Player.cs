@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using RobbieWagnerGames.Managers;
 using RobbieWagnerGames.Utilities;
@@ -34,6 +35,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         [SerializeField] private Vector2 movementBounds;
 
+        public event Action OnPlayerKilled;
+
         protected override void Awake()
         {
             base.Awake();
@@ -46,6 +49,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             InputManager.Instance.Controls.GAME.Shoot.performed += OnShoot;
 
             EnableControls();
+
+            PlayerManager.Instance.RegisterPlayer(this);
         }
 
         private void Update()
@@ -163,13 +168,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void OnTriggerEnter2D(Collider2D other)
         {
             if(other.gameObject.CompareTag("asteroid"))
-                OnPlayerKilled();
-        }
-
-        private void OnPlayerKilled()
-        {
-            DisableControls();
-            LevelManager.Instance.NotifyPlayerDeath();
+            {
+                DisableControls();
+                PlayerManager.Instance.NotifyPlayerDeath();
+            }
         }
 
         public void DisableControls() => InputManager.Instance.DisableActionMap(ActionMapName.GAME);

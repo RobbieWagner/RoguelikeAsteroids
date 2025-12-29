@@ -16,7 +16,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public event Action<Run> OnRunStarted;
         public event Action<Run> OnRunEnded;
         public event Action<Run> OnRunFailed;
-        public event Action<Level> OnStartNextLevel;
+        public event Action<Level> OnStartLevel;
         
         public event Action OnShowRunMenu;
         public event Action OnHideRunMenu;
@@ -146,7 +146,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             Level level = currentRun.CurrentLevel;
         
             yield return SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, false, null, false);
-            yield return SceneLoadManager.Instance.LoadSceneAdditive(level.sceneToLoad, true, () => {OnStartNextLevel?.Invoke(level);});
+            yield return SceneLoadManager.Instance.LoadSceneAdditive(level.sceneToLoad, true, () => {OnStartLevel?.Invoke(level);});
         }
 
         public void CompleteCurrentLevel()
@@ -160,15 +160,17 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             currentRun.currentLevelIndex++;
             
+            StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => {ShowRunMenu();}));
+
             if (currentRun.IsComplete)
                 EndRun(true);
-            else
-                StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => {ShowRunMenu();}));
         }
 
         public void FailRun()
         {
             if (currentRun == null) return;
+
+            StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"},true,() => {RunManager.Instance.FailRun();},false));
             
             OnRunFailed?.Invoke(currentRun);
             EndRun(false);

@@ -30,7 +30,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public float asteroidSpawnRate = 2f;
         public Vector2 asteroidSpeedRange = new Vector2(1f, 3f);
         public float levelDuration = 60f; // Set to -1 if not a requirement
-        public int requiredScore = 1000; // Set to -1 if not a requirement
+        public bool stopAtTimer => levelDuration > 0;
         public int requiredResources = 50; // Set to -1 if not a requirement
         
         // Resource distribution
