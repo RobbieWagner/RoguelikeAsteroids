@@ -160,10 +160,15 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             currentRun.currentLevelIndex++;
             
-            StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => {ShowRunMenu();}));
+            StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => { ContinueRun(); } ));           
+        }
 
+        public void ContinueRun()
+        {
             if (currentRun.IsComplete)
                 EndRun(true);
+            else
+                StartCoroutine(StartCurrentLevelCo()); // TODO: Show a run tree menu
         }
 
         public void FailRun()

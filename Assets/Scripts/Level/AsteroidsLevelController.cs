@@ -1,6 +1,7 @@
 using UnityEngine;
 using RobbieWagnerGames.Utilities;
 using System;
+using System.Collections;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -9,9 +10,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		[SerializeField] private Timer levelTimer;
         public Timer LevelTimer => levelTimer;
 
+		[SerializeField] private LevelCompleteScreen levelCompleteScreen;
+
 		protected override void Awake() 
 		{
-			base.Awake();
+            base.Awake();
 			levelTimer.OnTimerComplete += OnLevelTimerComplete;
 		}
 
@@ -25,7 +28,22 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		
 		private void OnLevelTimerComplete()
         {
-            CompleteLevel();
+			if(levelDetails.stopAtTimer)
+            	CompleteLevel();
+        }
+
+        protected override void CompleteLevel()
+        {
+            base.CompleteLevel();
+            StartCoroutine(DisplayLevelCompletionScreen());
+        }
+
+        private IEnumerator DisplayLevelCompletionScreen()
+        {
+			yield return levelCompleteScreen.DisplayScreen();
+
+            Debug.Log("done");
+            RunManager.Instance.CompleteCurrentLevel();
         }
 
         protected override void UnsubscribeEvents()

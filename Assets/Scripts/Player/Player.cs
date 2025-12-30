@@ -35,8 +35,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         [SerializeField] private Vector2 movementBounds;
 
-        public event Action OnPlayerKilled;
-
         protected override void Awake()
         {
             base.Awake();

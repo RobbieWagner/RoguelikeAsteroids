@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using RobbieWagnerGames.Managers;
 using UnityEngine;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
@@ -32,8 +33,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         protected virtual void CompleteLevel()
         {
+            InputManager.Instance.DisableActionMap(ActionMapName.GAME);
             OnLevelCompleted?.Invoke();
-            RunManager.Instance.CompleteCurrentLevel();
         }
 
         protected virtual void FailLevel()

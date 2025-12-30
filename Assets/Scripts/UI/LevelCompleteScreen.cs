@@ -1,67 +1,77 @@
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
-using RobbieWagnerGames.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
-    public class LevelCompleteScreen : Menu
+    public class LevelCompleteScreen : MonoBehaviour
     {
+        [Header("UI Elements")]
+        [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private Canvas canvas;
+        [SerializeField] private HorizontalLayoutGroup resourceLayout;
+        [SerializeField] private RectTransform resourceLayoutTransform;
+        [SerializeField] private float displayDuration = 2f;
+        [SerializeField] private float fadeDuration = 0.5f;
+        
         [Header("Resource Display")]
-        [SerializeField] private Transform resourceUIParent;
         [SerializeField] private ResourceUI resourceUIPrefab;
-        [SerializeField] private float resourceDisplayDelay = 0.2f;
-        [SerializeField] private float animationDuration = 0.5f;
+        
+        private List<ResourceUI> displayedResources = new List<ResourceUI>();
 
-        private Dictionary<ResourceType, ResourceUI> displayedResources = new Dictionary<ResourceType, ResourceUI>();
-        private Sequence displaySequence;
-
-        private void DisplayFinalResources()
+        public IEnumerator DisplayScreen()
         {
-            Dictionary<ResourceType, int> finalResources = ResourceManager.Instance.gatheredResources;
-            if (finalResources == null || finalResources.Count == 0)
-            {
-                Debug.LogWarning("No resources to display!");
-                return;
-            }
+            ClearResources();
             
-            foreach (Transform child in resourceUIParent)
-                Destroy(child.gameObject);
-            displayedResources.Clear();
-            
-            displaySequence?.Kill();
-            displaySequence = DOTween.Sequence();
-            
-            float delay = 0f;
-            int totalResources = 0;
-            foreach (var resource in finalResources)
-            {
-                if (resource.Key == ResourceType.NONE || resource.Value <= 0) continue;
-                
-                totalResources += resource.Value;
-                
-                displaySequence.AppendCallback(() => DisplayResource(resource.Key, resource.Value));
-                displaySequence.AppendInterval(resourceDisplayDelay);
-                
-                delay += resourceDisplayDelay;
-            }
-            
-            displaySequence.OnComplete(() =>
-            {
-            });
+            canvasGroup.alpha = 0;
+            canvas.enabled = true;
+            yield return canvasGroup.DOFade(1, fadeDuration).WaitForCompletion();
+
+            yield return StartCoroutine(DisplayResourcesAnimated());
+            yield return new WaitForSeconds(displayDuration);
         }
 
-        private void DisplayResource(ResourceType resourceType, int amount)
+        private IEnumerator DisplayResourcesAnimated()
         {
-            ResourceUI resourceUI = Instantiate(resourceUIPrefab, resourceUIParent);
+            Dictionary<ResourceType, int> resources = ResourceManager.Instance.gatheredResources;
             
-            resourceUI.Initialize(resourceType, amount);
+            float resourceWidth = 100; 
+            int validCount = 0;
             
-            displayedResources[resourceType] = resourceUI;
+            foreach (KeyValuePair<ResourceType, int> resource in resources)
+            {
+                if (resource.Key == ResourceType.NONE || resource.Value <= 0) 
+                    continue;
+                
+                ResourceUI resourceUI = Instantiate(resourceUIPrefab, resourceLayout.transform);
+                resourceUI.Initialize(resource.Key, resource.Value);
+                displayedResources.Add(resourceUI);
+                validCount++;
+            }
             
-            resourceUI.transform.localScale = Vector3.zero;
-            resourceUI.transform.DOScale(Vector3.one, animationDuration)
-                .SetEase(Ease.OutBack);
+            float targetWidth = validCount * resourceWidth;
+            resourceLayoutTransform.sizeDelta = new Vector2(0, resourceLayoutTransform.sizeDelta.y);
+            yield return resourceLayoutTransform.DOSizeDelta(new Vector2(targetWidth, resourceLayoutTransform.sizeDelta.y), 0.5f)
+                .SetEase(Ease.OutBack)
+                .WaitForCompletion();
+        }
+
+        private void ClearResources()
+        {
+            foreach (ResourceUI resourceUI in displayedResources)
+            {
+                if (resourceUI != null && resourceUI.gameObject != null)
+                    Destroy(resourceUI.gameObject);
+            }
+            displayedResources.Clear();
+        }
+
+        private void OnDestroy()
+        {
+            ClearResources();
+            canvasGroup.DOKill();
         }
     }
 }
