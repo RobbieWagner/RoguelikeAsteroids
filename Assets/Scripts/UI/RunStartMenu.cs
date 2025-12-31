@@ -5,7 +5,7 @@ using TMPro;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
-    public class RunMenu : Menu
+    public class RunStartMenu : Menu
     {
         [Header("Run Menu UI")]
         [SerializeField] private Button startRunButton;

@@ -1,29 +1,29 @@
 using System;
 using System.Collections.Generic;
 using AYellowpaper.SerializedCollections;
+using UnityEngine;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
-    [System.Serializable]
+    [Serializable]
     public class Run
     {
         public int runSeed;
         
         // Configuration
-        public int totalLevels = 5;
+        [Range(2,15)] public int tiers = 5;
         public float difficulty = 1f;
         public bool includeShopLevels = true;
         public bool includeBossLevels = true;
         public SerializedDictionary<ResourceType, int> startingResources = new SerializedDictionary<ResourceType, int>();
         public int startingHealth = 3;
         
-        // Progression
-        public int currentLevelIndex {get; set;}
-        public List<Level> levels = new List<Level>();
+        public int currentTier { get; set; }
+        public LevelNode currentNode { get; set; }
+        public List<List<LevelNode>> levelTree = new List<List<LevelNode>>();
         
-        // Helper properties
-        public bool IsComplete => currentLevelIndex >= levels.Count;
-        public Level CurrentLevel => !IsComplete && currentLevelIndex < levels.Count ? 
-            levels[currentLevelIndex] : null;
+        public bool IsComplete => currentNode == null || (levelTree.Count > 0 && 
+            currentNode.tier == levelTree.Count - 1 && currentNode.connections.Count == 0);
+        public Level CurrentLevel => currentNode?.level;
     }
 }

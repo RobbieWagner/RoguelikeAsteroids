@@ -8,12 +8,13 @@ using UnityEngine;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
-    public class RunManager : MonoBehaviourSingleton<RunManager>
+    public partial class RunManager : MonoBehaviourSingleton<RunManager>
     {   
         [SerializeField] private Run defaultRun = new Run();
         private Run currentRun;
         
         public event Action<Run> OnRunStarted;
+        public event Action<Run> OnRunContinued;
         public event Action<Run> OnRunEnded;
         public event Action<Run> OnRunFailed;
         public event Action<Level> OnStartLevel;
@@ -37,52 +38,21 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             ShowRunMenu();
         }
 
-        public void CreateNewRun(int levelCount, float difficulty, bool includeShops, bool includeBosses)
+        public void CreateNewRun(int tiers, float difficulty, bool includeShops, bool includeBosses)
         {
             currentRun = new Run
             {
-                totalLevels = levelCount,
+                tiers = tiers,
                 difficulty = difficulty,
                 includeShopLevels = includeShops,
                 includeBossLevels = includeBosses,
                 startingResources = CalculateStartingResources(),
-                startingHealth = 3, //TODO: pull from game save data
-                levels = GenerateLevels(levelCount, difficulty, includeShops, includeBosses)
+                startingHealth = 3
             };
-        }
 
-        private List<Level> GenerateLevels(int count, float difficulty, bool includeShops, bool includeBosses)
-        {
-            List<Level> levels = new List<Level>();
-            
-            for (int i = 0; i < count; i++)
-            {
-                LevelType levelType = DetermineLevelType(i, count, includeShops, includeBosses);
-                
-                Level level = new Level
-                {
-                    levelType = levelType,
-                    difficultyMultiplier = CalculateLevelDifficulty(i, difficulty),
-                    sceneToLoad = GetSceneForLevelType(levelType)
-                };
-                
-                ConfigureLevelParameters(level);
-                
-                levels.Add(level);
-            }
-            
-            return levels;
-        }
-
-        private LevelType DetermineLevelType(int index, int total, bool includeShops, bool includeBosses)
-        {
-            if (includeBosses && index == total - 1)
-                return LevelType.BOSS;
-            
-            if (includeShops && (index + 1) % 3 == 0)
-                return LevelType.SHOP;
-            
-            return LevelType.ASTEROIDS;
+            GenerateLevelTree(tiers, difficulty, includeShops, includeBosses);
+            currentRun.currentNode = currentRun.levelTree[0][0];
+            DebugLogLevelTree();
         }
 
         private float CalculateLevelDifficulty(int levelIndex, float baseDifficulty)
@@ -127,19 +97,20 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public void StartRun()
         {
             if (currentRun == null)
-                CreateNewRun(defaultRun.totalLevels, defaultRun.difficulty, defaultRun.includeShopLevels, defaultRun.includeBossLevels);
+                CreateNewRun(defaultRun.tiers, defaultRun.difficulty, defaultRun.includeShopLevels, defaultRun.includeBossLevels);
 
             OnHideRunMenu?.Invoke();
             OnRunStarted?.Invoke(currentRun);
             
-            StartCoroutine(StartCurrentLevelCo());
+            currentRun.currentTier = 0;
+            ContinueRun();
         }
 
         public IEnumerator StartCurrentLevelCo()
         {
             if (currentRun.IsComplete)
             {
-                Debug.Log($"{currentRun.currentLevelIndex} {currentRun.levels.Count} ");
+                Debug.Log($"{currentRun.currentTier} {currentRun.tiers} ");
                 yield break;
             }
                 
@@ -158,17 +129,19 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             Level level = currentRun.CurrentLevel;
             if (level == null) return;
             
-            currentRun.currentLevelIndex++;
-            
+            currentRun.currentTier++;
             StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => { ContinueRun(); } ));           
         }
 
         public void ContinueRun()
         {
             if (currentRun.IsComplete)
+            {    
                 EndRun(true);
-            else
-                StartCoroutine(StartCurrentLevelCo()); // TODO: Show a run tree menu
+                return;
+            }
+
+            OnRunContinued?.Invoke(CurrentRun);
         }
 
         public void FailRun()
@@ -211,7 +184,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            
             GameManager.Instance.OnGameStart -= OnGameStarted;
         }
     }

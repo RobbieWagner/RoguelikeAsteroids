@@ -7,6 +7,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 {
     public enum LevelType
     {
+        NONE = -1,
         ASTEROIDS,
         SHOP,
         BOSS,
@@ -32,6 +33,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public float levelDuration = 20f; // Set to -1 if not a requirement
         public bool stopAtTimer => levelDuration > 0;
         public int requiredResources = 50; // Set to -1 if not a requirement
+        public int tier { get; set;}
         
         // Resource distribution
         public SerializedDictionary<ResourceType, int> resourceDistribution = new SerializedDictionary<ResourceType, int>();

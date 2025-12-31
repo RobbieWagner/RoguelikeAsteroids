@@ -1004,6 +1004,22 @@ MonoBehaviour:
       Value: {r: 0.84313726, g: 0.84313726, b: 0.84313726, a: 1}
     - Key: 2
       Value: {r: 0.49019608, g: 0.49019608, b: 0.84313726, a: 1}
+  levelColors:
+    _serializedList:
+    - Key: 0
+      Value: {r: 1, g: 1, b: 1, a: 1}
+    - Key: 2
+      Value: {r: 0.8396226, g: 0.13861692, b: 0.13861692, a: 1}
+    - Key: 1
+      Value: {r: 0.6608527, g: 0.7924528, b: 0.25792095, a: 1}
+  levelIcons:
+    _serializedList:
+    - Key: 0
+      Value: {fileID: 21300000, guid: d10be4c155f6e254a998cc68201d1afc, type: 3}
+    - Key: 2
+      Value: {fileID: 21300000, guid: a23c0d0f5384d9f43b834cdea5621314, type: 3}
+    - Key: 1
+      Value: {fileID: 21300000, guid: e40cf289098674f4a98b0bba32cf9c3c, type: 3}
 --- !u!4 &798675779
 Transform:
   m_ObjectHideFlags: 0
