@@ -18,11 +18,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public SerializedDictionary<ResourceType, int> startingResources = new SerializedDictionary<ResourceType, int>();
         public int startingHealth = 3;
         
-        public int currentTier { get; set; }
         public LevelNode currentNode { get; set; }
+        public int currentTier => currentNode.tier;
         public List<List<LevelNode>> levelTree = new List<List<LevelNode>>();
         
-        public bool IsComplete => currentNode == null || (levelTree.Count > 0 && 
+        public bool IsComplete => currentNode == null ? false : (levelTree.Count > 0 && 
             currentNode.tier == levelTree.Count - 1 && currentNode.connections.Count == 0);
         public Level CurrentLevel => currentNode?.level;
     }

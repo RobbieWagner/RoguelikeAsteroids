@@ -51,7 +51,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             };
 
             GenerateLevelTree(tiers, difficulty, includeShops, includeBosses);
-            currentRun.currentNode = currentRun.levelTree[0][0];
             DebugLogLevelTree();
         }
 
@@ -102,7 +101,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             OnHideRunMenu?.Invoke();
             OnRunStarted?.Invoke(currentRun);
             
-            currentRun.currentTier = 0;
             ContinueRun();
         }
 
@@ -128,8 +126,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             Level level = currentRun.CurrentLevel;
             if (level == null) return;
-            
-            currentRun.currentTier++;
+
             StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => { ContinueRun(); } ));           
         }
 

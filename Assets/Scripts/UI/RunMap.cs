@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RobbieWagnerGames.UI;
 using UnityEngine;
 
@@ -29,17 +30,24 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             RunManager.Instance.OnStartLevel += HideRunUI;
         }
 
-        
-
         private void DisplayRunUI(Run run)
         {
             ClearUI();
             InstantiateNodes(run);
             InstantiateConnections(run);
             ConfigureIntractability(run);
+            SetCanvasTransform(run);
 
             canvasGroup.alpha = 1;
             canvasGroup.interactable = true;
+        }
+
+        private void SetCanvasTransform(Run run)
+        {
+            Vector2 canvasPos = canvasGroup.transform.position;
+            canvasPos += Vector2.down * tierDisplayDistance * (run.currentNode != null ? run.currentNode.tier : 0) * 2;
+            Debug.Log(canvasPos);
+            canvasGroup.transform.position = canvasPos; 
         }
 
         private void HideRunUI(Level level)
@@ -150,20 +158,91 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             lineRenderer.startColor = GameConstants.Instance.levelColors[fromNode.level.levelType];
             lineRenderer.endColor = GameConstants.Instance.levelColors[toNode.level.levelType];
         }
-
         
         private void ConfigureIntractability(Run run)
         {
-            foreach(LevelButton button in levelButtonInstances)
-            {
+            LevelNode currentNode = run.currentNode;
+
+            foreach (LevelButton button in levelButtonInstances)
                 button.DisableButton();
 
-                if (button.level.tier < run.currentTier)
-                    button.button.image.color = new Color(.1f, .1f, .1f, 1f);
-                else if (button.level.tier == run.currentTier)
-                    button.EnableButton();
-                else
-                    button.button.image.color = new Color(.4f, .4f, .4f, .4f);
+            List<LevelButton> presentButtons = new List<LevelButton>();
+            List<LevelButton> futureButtons = new List<LevelButton>();
+            List<LevelButton> pastButtons = new List<LevelButton>();
+
+            if (currentNode == null) // if no current node, enable the root nodes only
+            {
+                presentButtons.AddRange(levelButtonInstances.Where(b => b.levelNode.tier == 0));
+                futureButtons.AddRange(levelButtonInstances.Where(b => b.levelNode.tier != 0));
+            }
+            else
+            {
+                presentButtons.AddRange(levelButtonInstances.Where(b => 
+                    currentNode.connections.Any(conn => conn.Equals(b.levelNode))));
+                HashSet<LevelNode> reachableNodes = FindReachableNodes(currentNode);
+                
+                futureButtons.AddRange(levelButtonInstances.Where(b => 
+                    reachableNodes.Contains(b.levelNode) && 
+                    !presentButtons.Contains(b)));
+                
+                pastButtons.AddRange(levelButtonInstances.Where(b => 
+                    !presentButtons.Contains(b) && 
+                    !futureButtons.Contains(b)));
+            }
+
+            ApplyButtonStates(presentButtons, futureButtons, pastButtons);
+        }
+
+        private HashSet<LevelNode> FindReachableNodes(LevelNode startNode)
+        {
+            HashSet<LevelNode> reachable = new HashSet<LevelNode>();
+            Queue<LevelNode> toProcess = new Queue<LevelNode>();
+            
+            foreach (LevelNode connection in startNode.connections)
+            {
+                reachable.Add(connection);
+                toProcess.Enqueue(connection);
+            }
+            
+            while (toProcess.Count > 0)
+            {
+                LevelNode current = toProcess.Dequeue();
+                
+                foreach (LevelNode next in current.connections)
+                {
+                    if (!reachable.Contains(next))
+                    {
+                        reachable.Add(next);
+                        toProcess.Enqueue(next);
+                    }
+                }
+            }
+            
+            return reachable;
+        }
+
+        private void ApplyButtonStates(List<LevelButton> presentButtons, List<LevelButton> futureButtons, List<LevelButton> pastButtons)
+        {
+            foreach (LevelButton button in presentButtons)
+            {
+                button.EnableButton();
+                button.button.image.color = GameConstants.Instance.levelColors[button.level.levelType];
+            }
+            
+            foreach (LevelButton button in futureButtons)
+            {
+                button.DisableButton();
+                Color futureColor = GameConstants.Instance.levelColors[button.level.levelType];
+                futureColor *= 0.5f;
+                button.button.image.color = futureColor;
+            }
+            
+            foreach (LevelButton button in pastButtons)
+            {
+                button.DisableButton();
+                Color pastColor = GameConstants.Instance.levelColors[button.level.levelType];
+                pastColor *= 0.2f;
+                button.button.image.color = pastColor;
             }
         }
     }

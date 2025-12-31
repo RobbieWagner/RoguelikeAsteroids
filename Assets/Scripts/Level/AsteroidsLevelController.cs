@@ -1,6 +1,5 @@
 using UnityEngine;
 using RobbieWagnerGames.Utilities;
-using System;
 using System.Collections;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
@@ -41,8 +40,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private IEnumerator DisplayLevelCompletionScreen()
         {
 			yield return levelCompleteScreen.DisplayScreen();
-
-            Debug.Log("done");
             RunManager.Instance.CompleteCurrentLevel();
         }
 

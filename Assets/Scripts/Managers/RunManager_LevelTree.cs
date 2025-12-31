@@ -18,9 +18,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             GenerateBossLevel(tiers, difficulty, includeBosses);
 
             RunTreeBuilder.ConnectLevelNodes(currentRun.levelTree);
-            
-            if (currentRun.levelTree.Count > 0 && currentRun.levelTree[0].Count > 0)
-                currentRun.currentNode = currentRun.levelTree[0][0];
         }
 
         private void GenerateRootLevel(float baseDifficulty)
