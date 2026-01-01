@@ -169,8 +169,9 @@ MonoBehaviour:
   canvas: {fileID: 1417404137}
   resourceLayout: {fileID: 1258829369}
   resourceLayoutTransform: {fileID: 1258829368}
-  displayDuration: 2
+  displayDuration: 0.25
   fadeDuration: 0.5
+  transferAnimationDuration: 1.25
   resourceUIPrefab: {fileID: 3004665645326433716, guid: 9ea4a42b291359e479ac28f06d4e6a34, type: 3}
 --- !u!225 &3975912
 CanvasGroup:

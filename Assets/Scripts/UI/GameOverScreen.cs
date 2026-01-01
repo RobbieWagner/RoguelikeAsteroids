@@ -37,7 +37,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            RunManager.Instance.OnRunFailed -= OnGameOver;
+            if (RunManager.Instance != null)
+                RunManager.Instance.OnRunFailed -= OnGameOver;
             displaySequence?.Kill();
             
             retryButton.onClick.RemoveListener(OnRetryClicked);
@@ -73,12 +74,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             displaySequence = DOTween.Sequence();
             
             float delay = 0f;
-            int totalResources = 0;
-            foreach (var resource in finalResources)
+            foreach (KeyValuePair<ResourceType, int> resource in finalResources)
             {
                 if (resource.Key == ResourceType.NONE || resource.Value <= 0) continue;
-                
-                totalResources += resource.Value;
                 
                 displaySequence.AppendCallback(() => DisplayResource(resource.Key, resource.Value));
                 displaySequence.AppendInterval(resourceDisplayDelay);
@@ -100,7 +98,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             ResourceUI resourceUI = Instantiate(resourceUIPrefab, resourceUIParent);
             
-            resourceUI.Initialize(resourceType, amount);
+            resourceUI.Initialize(resourceType, amount, 0);
             
             displayedResources[resourceType] = resourceUI;
             

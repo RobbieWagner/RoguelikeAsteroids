@@ -15,11 +15,18 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private RectTransform resourceLayoutTransform;
         [SerializeField] private float displayDuration = 2f;
         [SerializeField] private float fadeDuration = 0.5f;
+        [SerializeField] private float transferAnimationDuration = 1.5f;
         
         [Header("Resource Display")]
         [SerializeField] private ResourceUI resourceUIPrefab;
         
-        private List<ResourceUI> displayedResources = new List<ResourceUI>();
+        private Dictionary<ResourceType, ResourceUI> displayedResources = new Dictionary<ResourceType, ResourceUI>();
+        private AsteroidsLevelController levelController;
+
+        private void Awake()
+        {
+            levelController = FindFirstObjectByType<AsteroidsLevelController>();
+        }
 
         public IEnumerator DisplayScreen()
         {
@@ -31,24 +38,34 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             yield return StartCoroutine(DisplayResourcesAnimated());
             yield return new WaitForSeconds(displayDuration);
+            
+            yield return StartCoroutine(AnimateResourceTransfer());
+            yield return new WaitForSeconds(0.5f);
         }
 
         private IEnumerator DisplayResourcesAnimated()
         {
-            Dictionary<ResourceType, int> resources = ResourceManager.Instance.gatheredResources;
+            Dictionary<ResourceType, int> gatheredResources = ResourceManager.Instance.gatheredResources;
+            Dictionary<ResourceType, int> collectedResources = levelController != null ? 
+                levelController.collectedResources : new Dictionary<ResourceType, int>();
             
-            float resourceWidth = 100; 
+            float resourceWidth = 150;
             int validCount = 0;
             
-            foreach (KeyValuePair<ResourceType, int> resource in resources)
+            foreach (ResourceType type in System.Enum.GetValues(typeof(ResourceType)))
             {
-                if (resource.Key == ResourceType.NONE || resource.Value <= 0) 
-                    continue;
+                if (type == ResourceType.NONE) continue;
                 
-                ResourceUI resourceUI = Instantiate(resourceUIPrefab, resourceLayout.transform);
-                resourceUI.Initialize(resource.Key, resource.Value);
-                displayedResources.Add(resourceUI);
-                validCount++;
+                int gatheredAmount = gatheredResources.ContainsKey(type) ? gatheredResources[type] : 0;
+                int collectedAmount = collectedResources.ContainsKey(type) ? collectedResources[type] : 0;
+                
+                if (gatheredAmount > 0 || collectedAmount > 0)
+                {
+                    ResourceUI resourceUI = Instantiate(resourceUIPrefab, resourceLayout.transform);
+                    resourceUI.Initialize(type, gatheredAmount, collectedAmount);
+                    displayedResources[type] = resourceUI;
+                    validCount++;
+                }
             }
             
             float targetWidth = validCount * resourceWidth;
@@ -58,9 +75,32 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 .WaitForCompletion();
         }
 
+        private IEnumerator AnimateResourceTransfer()
+        {
+            List<Coroutine> transferCoroutines = new List<Coroutine>();
+            
+            foreach (KeyValuePair<ResourceType, ResourceUI> displayedResource in displayedResources)
+            {
+                if (displayedResource.Value != null && displayedResource.Value.GetCollectedAmount() > 0)
+                {
+                    Coroutine transferCo = StartCoroutine(displayedResource.Value.TransferAnimation(transferAnimationDuration));
+                    transferCoroutines.Add(transferCo);
+                }
+            }
+            
+            foreach (Coroutine coroutine in transferCoroutines)
+                yield return coroutine;
+
+            foreach (KeyValuePair<ResourceType, int> resource in levelController.collectedResources)
+            {
+                if (resource.Key != ResourceType.NONE && resource.Value > 0)
+                    ResourceManager.Instance.AddResource(resource.Key, resource.Value);
+            }
+        }
+
         private void ClearResources()
         {
-            foreach (ResourceUI resourceUI in displayedResources)
+            foreach (ResourceUI resourceUI in displayedResources.Values)
             {
                 if (resourceUI != null && resourceUI.gameObject != null)
                     Destroy(resourceUI.gameObject);

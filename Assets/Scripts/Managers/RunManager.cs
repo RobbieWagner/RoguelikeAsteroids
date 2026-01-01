@@ -104,14 +104,19 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             if (currentRun == null)
                 CreateNewRun(defaultRun.tiers, defaultRun.difficulty, defaultRun.includeShopLevels, defaultRun.includeBossLevels);
             else
-                currentRun.DeserializeNodeTree();
-                
+                LoadRun();
+
             // LogLevelTree();
 
             OnHideRunMenu?.Invoke();
             OnRunStarted?.Invoke(currentRun);
             
             ContinueRun();
+        }
+
+        private void LoadRun()
+        {
+            currentRun.DeserializeNodeTree();
         }
 
         public IEnumerator StartCurrentLevelCo()
@@ -193,6 +198,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void SaveRunData()
         {
             CurrentRun.PrepForSerialization();
+            currentRun.runResources.Clear();
+            foreach(KeyValuePair<ResourceType, int> resource in ResourceManager.Instance.gatheredResources)
+                CurrentRun.runResources.Add(resource.Key, resource.Value);
 
             if(!JsonDataService.Instance.SaveData(GameConstants.RunPath, CurrentRun))
                 throw new InvalidOperationException("Could not save run data");

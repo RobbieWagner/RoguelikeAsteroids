@@ -7,7 +7,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 {
     public class ResourceManager : MonoBehaviourSingleton<ResourceManager>
     {
-        public Dictionary<ResourceType, int> gatheredResources = new Dictionary<ResourceType, int>();
+        private Dictionary<ResourceType, int> _gatheredResources = new Dictionary<ResourceType, int>();
+        public Dictionary<ResourceType, int> gatheredResources => _gatheredResources; 
         
         public event Action<ResourceType, int> OnResourceAdded;
         public event Action<ResourceType, int> OnResourceRemoved;
@@ -32,16 +33,16 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private void InitializeResourceDictionary()
         {
-            gatheredResources.Clear();
+            _gatheredResources.Clear();
             
             foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
             {
                 if (type != ResourceType.NONE)
-                    gatheredResources[type] = 0;
+                    _gatheredResources[type] = 0;
             }
             
             OnResourcesReset?.Invoke();
-            OnResourcesUpdated?.Invoke(new Dictionary<ResourceType, int>(gatheredResources));
+            OnResourcesUpdated?.Invoke(new Dictionary<ResourceType, int>(_gatheredResources));
         }
 
         public void ResetResources()
@@ -53,13 +54,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if (resourceType == ResourceType.NONE || amount <= 0) return;
             
-            if (gatheredResources.ContainsKey(resourceType))
-                gatheredResources[resourceType] += amount;
+            if (_gatheredResources.ContainsKey(resourceType))
+                _gatheredResources[resourceType] += amount;
             else
-                gatheredResources[resourceType] = amount;
+                _gatheredResources[resourceType] = amount;
             
             OnResourceAdded?.Invoke(resourceType, amount);
-            OnResourcesUpdated?.Invoke(new Dictionary<ResourceType, int>(gatheredResources));
+            OnResourcesUpdated?.Invoke(new Dictionary<ResourceType, int>(_gatheredResources));
         }
         
         public void AddResources(Dictionary<ResourceType, int> resources)
@@ -73,17 +74,17 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public void RemoveResource(ResourceType resourceType, int amount)
         {
             if (resourceType == ResourceType.NONE || amount <= 0 || 
-                !gatheredResources.ContainsKey(resourceType)) return;
+                !_gatheredResources.ContainsKey(resourceType)) return;
             
-            gatheredResources[resourceType] = Mathf.Max(0, gatheredResources[resourceType] - amount);
+            _gatheredResources[resourceType] = Mathf.Max(0, _gatheredResources[resourceType] - amount);
             
             OnResourceRemoved?.Invoke(resourceType, amount);
-            OnResourcesUpdated?.Invoke(new Dictionary<ResourceType, int>(gatheredResources));
+            OnResourcesUpdated?.Invoke(new Dictionary<ResourceType, int>(_gatheredResources));
         }
         
         public bool HasResource(ResourceType resourceType, int amount)
         {
-            return gatheredResources.ContainsKey(resourceType) && gatheredResources[resourceType] >= amount;
+            return _gatheredResources.ContainsKey(resourceType) && _gatheredResources[resourceType] >= amount;
         }
         
         public bool HasResources(Dictionary<ResourceType, int> requiredResources)
@@ -112,15 +113,15 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             if (!HasResources(costDetails)) return false;
             
             foreach (KeyValuePair<ResourceType, int> costDetail in costDetails)
-                gatheredResources[costDetail.Key] -= costDetail.Value;
+                _gatheredResources[costDetail.Key] -= costDetail.Value;
             
-            OnResourcesUpdated?.Invoke(new Dictionary<ResourceType, int>(gatheredResources));
+            OnResourcesUpdated?.Invoke(new Dictionary<ResourceType, int>(_gatheredResources));
             return true;
         }
         
         public Dictionary<ResourceType, int> GetAllResources()
         {
-            return new Dictionary<ResourceType, int>(gatheredResources);
+            return new Dictionary<ResourceType, int>(_gatheredResources);
         }
     }
 }

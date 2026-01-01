@@ -87,17 +87,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		
 		private void HandlePipCollected(ResourcePip pip, ResourceType resourceType, int amount)
 		{
-			if (ResourceManager.Instance != null)
-				ResourceManager.Instance.AddResource(resourceType, amount);
+			levelController.OnResourceCollected(resourceType, amount);
 			
 			OnPipCollected?.Invoke(pip);
 			
 			if (activePips.Remove(pip))
-			{
-				pip.OnPipCollected -= HandlePipCollected;
-				pip.OnPipDestroyed -= HandlePipDestroyed;
-				Destroy(pip.gameObject);
-			}
+				pip.DestroyPip();
 		}
 		
 		private void HandlePipDestroyed(ResourcePip pip)

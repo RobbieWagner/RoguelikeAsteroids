@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using RobbieWagnerGames.Utilities;
 using TMPro;
-using UnityEngine.InputSystem;
 using System;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
@@ -41,6 +40,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             levelController.OnLevelFailed += OnLevelFailed;
             levelController.LevelTimer.OnTimerUpdate += UpdateLevelTimer;
             levelController.LevelTimer.OnTimerComplete += CompleteLevelTimer;
+            levelController.OnResourceAdded += OnLevelResourceAdded;
+            levelController.OnResourcesUpdated += OnLevelResourcesUpdated;
 
             GameManager.Instance.OnReturnToMenu += HideHUD;
             GameManager.Instance.OnGameStart += ShowHUD;
@@ -55,7 +56,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
                 {
                     if (type != ResourceType.NONE)
-                        CreateResourceUI(type, 0);
+                        CreateResourceUI(type, GetResourceAmount(type), 0);
                 }
             }
         }
@@ -70,7 +71,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             activeResourceUIs.Clear();
         }
         
-        private void CreateResourceUI(ResourceType resourceType, int amount)
+        private void CreateResourceUI(ResourceType resourceType, int gatheredAmount, int collectedAmount)
         {
             if (resourceUIPrefab == null || resourcesList == null)
             {
@@ -79,24 +80,24 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             }
             
             ResourceUI newUI = Instantiate(resourceUIPrefab, resourcesList.transform);
-            newUI.Initialize(resourceType, amount);
+            newUI.Initialize(resourceType, gatheredAmount, collectedAmount);
             activeResourceUIs[resourceType] = newUI;
             
-            if (hideEmptyResources && amount <= 0)
+            if (hideEmptyResources && gatheredAmount <= 0 && collectedAmount <= 0)
                 newUI.gameObject.SetActive(false);
         }
         
-        private void UpdateResourceUI(ResourceType resourceType, int amount)
+        private void UpdateResourceUI(ResourceType resourceType, int gatheredAmount, int collectedAmount)
         {
             if (!activeResourceUIs.ContainsKey(resourceType) || activeResourceUIs[resourceType] == null)
-                CreateResourceUI(resourceType, amount);
+                CreateResourceUI(resourceType, gatheredAmount, collectedAmount);
             else
             {
-                activeResourceUIs[resourceType].UpdateAmount(amount);
+                activeResourceUIs[resourceType].UpdateAmount(gatheredAmount, collectedAmount);
                 
                 if (hideEmptyResources)
                 {
-                    if (amount <= 0)
+                    if (gatheredAmount <= 0 && collectedAmount <= 0)
                         activeResourceUIs[resourceType].gameObject.SetActive(false);
                     else if (!activeResourceUIs[resourceType].gameObject.activeSelf)
                         activeResourceUIs[resourceType].gameObject.SetActive(true);
@@ -106,12 +107,23 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private void OnResourceAdded(ResourceType resourceType, int amount)
         {
-            UpdateResourceUI(resourceType, GetResourceAmount(resourceType));
+            int gatheredAmount = GetResourceAmount(resourceType);
+            int collectedAmount = GetCollectedResourceAmount(resourceType);
+            UpdateResourceUI(resourceType, gatheredAmount, collectedAmount);
         }
         
         private void OnResourceRemoved(ResourceType resourceType, int amount)
         {
-            UpdateResourceUI(resourceType, GetResourceAmount(resourceType));
+            int gatheredAmount = GetResourceAmount(resourceType);
+            int collectedAmount = GetCollectedResourceAmount(resourceType);
+            UpdateResourceUI(resourceType, gatheredAmount, collectedAmount);
+        }
+        
+        private void OnLevelResourceAdded(ResourceType resourceType, int amount)
+        {
+            int gatheredAmount = GetResourceAmount(resourceType);
+            int collectedAmount = GetCollectedResourceAmount(resourceType);
+            UpdateResourceUI(resourceType, gatheredAmount, collectedAmount);
         }
         
         private void OnResourcesReset()
@@ -128,8 +140,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             {
                 foreach (KeyValuePair<ResourceType, int> resource in resources)
                 {
-                    if (resource.Value > 0)
-                        UpdateResourceUI(resource.Key, resource.Value);
+                    if (resource.Value > 0 || HasCollectedResources(resource.Key))
+                    {
+                        int gatheredAmount = resource.Value;
+                        int collectedAmount = GetCollectedResourceAmount(resource.Key);
+                        UpdateResourceUI(resource.Key, gatheredAmount, collectedAmount);
+                    }
                 }
             }
             else
@@ -138,9 +154,24 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 {
                     if (type != ResourceType.NONE)
                     {
-                        int amount = resources.ContainsKey(type) ? resources[type] : 0;
-                        UpdateResourceUI(type, amount);
+                        int gatheredAmount = resources.ContainsKey(type) ? resources[type] : 0;
+                        int collectedAmount = GetCollectedResourceAmount(type);
+                        UpdateResourceUI(type, gatheredAmount, collectedAmount);
                     }
+                }
+            }
+        }
+        
+        private void OnLevelResourcesUpdated(Dictionary<ResourceType, int> collectedResources)
+        {
+            if (collectedResources == null) return;
+            
+            foreach (var resource in collectedResources)
+            {
+                if (resource.Key != ResourceType.NONE)
+                {
+                    int gatheredAmount = GetResourceAmount(resource.Key);
+                    UpdateResourceUI(resource.Key, gatheredAmount, resource.Value);
                 }
             }
         }
@@ -150,6 +181,19 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             if (ResourceManager.Instance != null && ResourceManager.Instance.gatheredResources.ContainsKey(resourceType))
                 return ResourceManager.Instance.gatheredResources[resourceType];
             return 0;
+        }
+        
+        private int GetCollectedResourceAmount(ResourceType resourceType)
+        {
+            if (levelController != null && levelController.collectedResources.ContainsKey(resourceType))
+                return levelController.collectedResources[resourceType];
+            return 0;
+        }
+        
+        private bool HasCollectedResources(ResourceType resourceType)
+        {
+            return levelController != null && levelController.collectedResources.ContainsKey(resourceType) && 
+                   levelController.collectedResources[resourceType] > 0;
         }
 
         private void UpdateLevelTimer(float time)
@@ -166,19 +210,26 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             Level level = levelController.levelDetails;
 
-			if (level.levelDuration > 0)
-			{
-				timeSlider.minValue = 0;
+            if (level.levelDuration > 0)
+            {
+                timeSlider.minValue = 0;
                 timeSlider.maxValue = level.levelDuration;
                 timeSlider.value = 0;
                 timeSlider.gameObject.SetActive(true);
-			}
-			else
-			{
-				timeSlider.gameObject.SetActive(false);
-			}
+            }
+            else
+                timeSlider.gameObject.SetActive(false);
 
             levelText.text = level.levelType.ToString();
+            
+            foreach (var ui in activeResourceUIs.Values)
+            {
+                if (ui != null)
+                {
+                    int gatheredAmount = GetResourceAmount(ui.GetResourceType());
+                    ui.UpdateAmount(gatheredAmount, 0, false);
+                }
+            }
         }
 
         private void OnLevelFailed()
@@ -206,20 +257,22 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            
-            ResourceManager.Instance.OnResourceAdded -= OnResourceAdded;
-            ResourceManager.Instance.OnResourceRemoved -= OnResourceRemoved;
-            ResourceManager.Instance.OnResourcesReset -= OnResourcesReset;
-            ResourceManager.Instance.OnResourcesUpdated -= OnResourcesUpdated;
+ 
+                ResourceManager.Instance.OnResourceAdded -= OnResourceAdded;
+                ResourceManager.Instance.OnResourceRemoved -= OnResourceRemoved;
+                ResourceManager.Instance.OnResourcesReset -= OnResourcesReset;
+                ResourceManager.Instance.OnResourcesUpdated -= OnResourcesUpdated;
 
-            levelController.OnLevelStarted -= OnLevelStarted;
-            levelController.OnLevelCompleted -= OnLevelCompleted;
-            levelController.OnLevelFailed -= OnLevelFailed;
-            levelController.LevelTimer.OnTimerUpdate -= UpdateLevelTimer;
-            levelController.LevelTimer.OnTimerComplete -= CompleteLevelTimer;
+                levelController.OnLevelStarted -= OnLevelStarted;
+                levelController.OnLevelCompleted -= OnLevelCompleted;
+                levelController.OnLevelFailed -= OnLevelFailed;
+                levelController.LevelTimer.OnTimerUpdate -= UpdateLevelTimer;
+                levelController.LevelTimer.OnTimerComplete -= CompleteLevelTimer;
+                levelController.OnResourceAdded -= OnLevelResourceAdded;
+                levelController.OnResourcesUpdated -= OnLevelResourcesUpdated;
 
-            GameManager.Instance.OnReturnToMenu -= HideHUD;
-            GameManager.Instance.OnGameStart -= ShowHUD;
+                GameManager.Instance.OnReturnToMenu -= HideHUD;
+                GameManager.Instance.OnGameStart -= ShowHUD;
         }
     }
 }

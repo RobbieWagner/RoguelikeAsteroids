@@ -82,9 +82,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 rb2d.AddForce(directionToPlayer * magnetSpeed * Time.deltaTime, ForceMode2D.Force);
             }
             else
-            {
                 isBeingCollected = false;
-            }
         }
 
         private void UpdateRigidbody()
@@ -127,14 +125,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             isCollected = true;
             
-            ResourceManager.Instance?.AddResource(resourceType, amount);
             BasicAudioManager.Instance?.Play(AudioSourceName.ResourceCollected);
             
             OnPipCollected?.Invoke(this, resourceType, amount);
-            DestroyPip();
         }
         
-        private void DestroyPip()
+        public void DestroyPip()
         {
             OnPipDestroyed?.Invoke(this);
             
