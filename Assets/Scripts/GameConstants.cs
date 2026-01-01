@@ -9,5 +9,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		[SerializedDictionary("Resource","Color")] public SerializedDictionary<ResourceType, Color> resourceColors = new SerializedDictionary<ResourceType,Color>();
 		[SerializedDictionary("Level Type","Color")] public SerializedDictionary<LevelType, Color> levelColors = new SerializedDictionary<LevelType,Color>();
 		[SerializedDictionary("Level Type","Icon")] public SerializedDictionary<LevelType, Sprite> levelIcons = new SerializedDictionary<LevelType,Sprite>();
+	
+		public const string GameData = "game_data.json";
+        public const string RunPath = "run_data.json";
 	}
 }

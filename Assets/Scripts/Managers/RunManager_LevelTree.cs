@@ -102,7 +102,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             return level;
         }
 
-        private void DebugLogLevelTree()
+        private void LogLevelTree()
         {
             if (currentRun == null || currentRun.levelTree == null)
             {

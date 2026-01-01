@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System;
+using Newtonsoft.Json;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -8,11 +9,35 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		public Level level;
 		public int tier;
 		public int positionInTier;
-		public List<LevelNode> connections = new List<LevelNode>();
+		[JsonIgnore] public List<LevelNode> connections = new List<LevelNode>();
+		public string nodeID {get; private set;}
+		[JsonProperty] public List<string> connectionIDs {get; private set;}
+
+		public LevelNode()
+		{
+			nodeID = Guid.NewGuid().ToString();
+		}
+
+		public void PrepForSerialization()
+		{
+			connectionIDs = new List<string>();
+			foreach (LevelNode connection in connections)
+				connectionIDs.Add(connection.nodeID);
+		}
+
+		public void DeserializeConnections(Dictionary<string, LevelNode> nodes)
+		{
+			connections.Clear();
+            foreach (string connectionId in connectionIDs)
+            {
+                if (nodes.TryGetValue(connectionId, out LevelNode connectedNode))
+                    connections.Add(connectedNode);
+            }
+		}
 		
 		public override string ToString()
 		{
-			return $"Tier {tier}, Pos {positionInTier}: {level.levelType}";
+			return $"{JsonConvert.SerializeObject(this, Formatting.Indented)}";
 		}
 		
 		public override bool Equals(object obj)

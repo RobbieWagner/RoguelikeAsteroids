@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AYellowpaper.SerializedCollections;
 using RobbieWagnerGames.Managers;
 using RobbieWagnerGames.Utilities;
+using RobbieWagnerGames.Utilities.SaveData;
 using UnityEngine;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
@@ -30,6 +31,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             base.Awake();
             
             GameManager.Instance.OnGameStart += OnGameStarted;
+            GameManager.Instance.OnGameSaved += SaveRunData;
         }
 
         private void OnGameStarted()
@@ -51,7 +53,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             };
 
             GenerateLevelTree(tiers, difficulty, includeShops, includeBosses);
-            DebugLogLevelTree();
         }
 
         private float CalculateLevelDifficulty(int levelIndex, float baseDifficulty)
@@ -95,8 +96,14 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         public void StartRun()
         {
+            currentRun = JsonDataService.Instance.LoadDataRelative<Run>(GameConstants.RunPath, null);
+
             if (currentRun == null)
                 CreateNewRun(defaultRun.tiers, defaultRun.difficulty, defaultRun.includeShopLevels, defaultRun.includeBossLevels);
+            else
+                currentRun.DeserializeNodeTree();
+                
+            LogLevelTree();
 
             OnHideRunMenu?.Invoke();
             OnRunStarted?.Invoke(currentRun);
@@ -138,6 +145,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 return;
             }
 
+            GameManager.Instance.SaveGame();
             OnRunContinued?.Invoke(CurrentRun);
         }
 
@@ -178,10 +186,19 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             returnToMenuCo = StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => {GameManager.Instance.RestartGame();}, false));
         }
 
+        private void SaveRunData()
+        {
+            CurrentRun.PrepForSerialization();
+
+            if(!JsonDataService.Instance.SaveData(GameConstants.RunPath, CurrentRun))
+                throw new InvalidOperationException("Could not save run data");
+        }
+
         protected override void OnDestroy()
         {
             base.OnDestroy();
             GameManager.Instance.OnGameStart -= OnGameStarted;
+            GameManager.Instance.OnGameSaved -= SaveRunData;
         }
     }
 }

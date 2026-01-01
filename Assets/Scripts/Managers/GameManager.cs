@@ -11,6 +11,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     {
         public event Action OnGameStart;
         public event Action OnReturnToMenu;
+        public event Action OnGameSaved;
 
         private bool isGamePaused = false;
         public bool IsGamePaused => isGamePaused;
@@ -28,7 +29,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void LoadMenu()
         {
-            StartCoroutine(SceneLoadManager.Instance.LoadSceneAdditive("MenuScene"));
+            StartCoroutine(SceneLoadManager.Instance.LoadSceneAdditive("MenuScene", false));
         }
 
         public void StartGame()
@@ -104,6 +105,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 ResumeGame();
             else
                 PauseGame();
+        }
+
+        public void SaveGame()
+        {
+            OnGameSaved?.Invoke();
         }
     }
 }

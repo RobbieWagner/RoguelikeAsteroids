@@ -64,12 +64,6 @@ namespace RobbieWagnerGames
                     return _persistentDataPath;
                 }
             }
-
-            public const string Party = "player_party.json";
-            public const string Inventory = "player_inventory.json";
-            public const string Exploration = "exploration_data.json";
-            public const string GameData = "game_data.json";
-            public const string MapConfiguration = "map_configuration.json";
         }
         #endregion
 

@@ -11,6 +11,7 @@ namespace RobbieWagnerGames.Utilities.SaveData
         public bool SaveData<T>(string relativePath, T data, bool encrypt = false)
         {
             string path = CreateValidDataPath(relativePath);
+            Debug.Log(path);
             return SaveDataInternal(path, data, encrypt);
         }
 

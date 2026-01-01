@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AYellowpaper.SerializedCollections;
 using UnityEngine;
+using Newtonsoft.Json;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -15,15 +16,70 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public float difficulty = 1f;
         public bool includeShopLevels = true;
         public bool includeBossLevels = true;
-        public SerializedDictionary<ResourceType, int> startingResources = new SerializedDictionary<ResourceType, int>();
+        [JsonProperty] public SerializedDictionary<ResourceType, int> startingResources = new SerializedDictionary<ResourceType, int>();
         public int startingHealth = 3;
         
         public LevelNode currentNode { get; set; }
-        public int currentTier => currentNode.tier;
+        [JsonIgnore] public int currentTier => currentNode.tier;
         public List<List<LevelNode>> levelTree = new List<List<LevelNode>>();
         
-        public bool IsComplete => currentNode == null ? false : (levelTree.Count > 0 && 
+        [JsonIgnore] private Dictionary<string, LevelNode> _nodeLookup = new Dictionary<string, LevelNode>();
+        [JsonIgnore] public bool IsComplete => currentNode == null ? false : (levelTree.Count > 0 && 
             currentNode.tier == levelTree.Count - 1 && currentNode.connections.Count == 0);
-        public Level CurrentLevel => currentNode?.level;
+        [JsonIgnore] public Level CurrentLevel => currentNode?.level;
+
+        public void PrepForSerialization()
+        {
+            foreach (List<LevelNode> tierList in levelTree)
+            {
+                foreach (LevelNode node in tierList)
+                    node.PrepForSerialization();
+            }
+            
+            RebuildNodeLookup();
+        }
+        
+        public void DeserializeNodeTree()
+        {
+            RebuildNodeLookup();
+            
+            foreach (List<LevelNode> tierList in levelTree)
+            {
+                foreach (LevelNode node in tierList)
+                    node.DeserializeConnections(_nodeLookup);
+            }
+        }
+        
+        private void RebuildNodeLookup()
+        {
+            _nodeLookup.Clear();
+            foreach (List<LevelNode> tierList in levelTree)
+            {
+                foreach (LevelNode node in tierList)
+                {
+                    if (!string.IsNullOrEmpty(node.nodeID))
+                        _nodeLookup[node.nodeID] = node;
+                }
+            }
+        }
+        
+        public LevelNode GetNodeById(string nodeId)
+        {
+            _nodeLookup.TryGetValue(nodeId, out LevelNode node);
+            return node;
+        }
+        
+        public void AddNodeToTree(LevelNode node, int tier)
+        {
+            while (levelTree.Count <= tier)
+                levelTree.Add(new List<LevelNode>());
+            
+            node.tier = tier;
+            node.positionInTier = levelTree[tier].Count;
+            levelTree[tier].Add(node);
+            
+            if (!string.IsNullOrEmpty(node.nodeID))
+                _nodeLookup[node.nodeID] = node;
+        }
     }
 }

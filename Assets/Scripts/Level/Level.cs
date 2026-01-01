@@ -1,7 +1,6 @@
-using System;
-using System.Collections.Generic;
 using AYellowpaper.SerializedCollections;
 using UnityEngine;
+using Newtonsoft.Json;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -29,13 +28,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         // Level parameters
         public int asteroidCount = 10;
         public float asteroidSpawnRate = 2f;
-        public Vector2 asteroidSpeedRange = new Vector2(1f, 3f);
+        [JsonIgnore] public Vector2 asteroidSpeedRange = new Vector2(1f, 3f);
         public float levelDuration = 20f; // Set to -1 if not a requirement
         public bool stopAtTimer => levelDuration > 0;
         public int requiredResources = 50; // Set to -1 if not a requirement
         public int tier { get; set;}
         
         // Resource distribution
-        public SerializedDictionary<ResourceType, int> resourceDistribution = new SerializedDictionary<ResourceType, int>();
+        [JsonProperty] public SerializedDictionary<ResourceType, int> resourceDistribution = new SerializedDictionary<ResourceType, int>();
     }
 }
