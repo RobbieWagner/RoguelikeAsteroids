@@ -15,6 +15,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private Run currentRun;
         
         public event Action<Run> OnRunStarted;
+        public event Action<Run> OnNewRunStarted;
         public event Action<Run> OnRunContinued;
         public event Action<Run> OnRunEnded;
         public event Action<Run> OnRunFailed;
@@ -53,6 +54,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             };
 
             GenerateLevelTree(tiers, difficulty, includeShops, includeBosses);
+
+            OnNewRunStarted?.Invoke(currentRun);
         }
 
         private float CalculateLevelDifficulty(int levelIndex, float baseDifficulty)
@@ -103,7 +106,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             else
                 currentRun.DeserializeNodeTree();
                 
-            LogLevelTree();
+            // LogLevelTree();
 
             OnHideRunMenu?.Invoke();
             OnRunStarted?.Invoke(currentRun);
@@ -145,7 +148,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 return;
             }
 
-            GameManager.Instance.SaveGame();
+            if (currentRun.currentTier > -1) 
+                GameManager.Instance.SaveGame();
             OnRunContinued?.Invoke(CurrentRun);
         }
 

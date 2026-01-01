@@ -20,7 +20,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public int startingHealth = 3;
         
         public LevelNode currentNode { get; set; }
-        [JsonIgnore] public int currentTier => currentNode.tier;
+        [JsonIgnore] public int currentTier => currentNode != null ? currentNode.tier : -1;
         public List<List<LevelNode>> levelTree = new List<List<LevelNode>>();
         
         [JsonIgnore] private Dictionary<string, LevelNode> _nodeLookup = new Dictionary<string, LevelNode>();
@@ -48,6 +48,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 foreach (LevelNode node in tierList)
                     node.DeserializeConnections(_nodeLookup);
             }
+
+            if (currentNode != null)
+                currentNode.DeserializeConnections(_nodeLookup);
         }
         
         private void RebuildNodeLookup()

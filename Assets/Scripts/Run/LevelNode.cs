@@ -10,12 +10,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		public int tier;
 		public int positionInTier;
 		[JsonIgnore] public List<LevelNode> connections = new List<LevelNode>();
-		public string nodeID {get; private set;}
-		[JsonProperty] public List<string> connectionIDs {get; private set;}
+		public string nodeID {get; set;}
+		public List<string> connectionIDs = new List<string>();
 
 		public LevelNode()
 		{
 			nodeID = Guid.NewGuid().ToString();
+			connectionIDs = new List<string>();
 		}
 
 		public void PrepForSerialization()
@@ -47,21 +48,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 				
 			LevelNode other = (LevelNode)obj;
 			
-			return tier == other.tier && 
-			       positionInTier == other.positionInTier && 
-			       level == other.level;
+			return nodeID == other.nodeID;
 		}
 		
 		public override int GetHashCode()
 		{
-			unchecked
-			{
-				int hash = 17;
-				hash = hash * 23 + tier.GetHashCode();
-				hash = hash * 23 + positionInTier.GetHashCode();
-				hash = hash * 23 + (level?.GetHashCode() ?? 0);
-				return hash;
-			}
+			return nodeID.GetHashCode();
 		}
 		
 		public static bool operator ==(LevelNode left, LevelNode right)
