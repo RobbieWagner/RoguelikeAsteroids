@@ -49,11 +49,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 difficulty = difficulty,
                 includeShopLevels = includeShops,
                 includeBossLevels = includeBosses,
-                startingResources = CalculateStartingResources(),
+                runResources = CalculateStartingResources(),
                 startingHealth = 3
             };
 
             GenerateLevelTree(tiers, difficulty, includeShops, includeBosses);
+            ResourceManager.Instance.InitializeResourceDictionary(currentRun.runResources);
 
             OnNewRunStarted?.Invoke(currentRun);
         }
@@ -117,6 +118,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void LoadRun()
         {
             currentRun.DeserializeNodeTree();
+            ResourceManager.Instance.InitializeResourceDictionary(currentRun.runResources);
         }
 
         public IEnumerator StartCurrentLevelCo()

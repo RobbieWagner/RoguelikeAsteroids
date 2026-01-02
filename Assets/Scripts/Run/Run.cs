@@ -16,10 +16,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public float difficulty = 1f;
         public bool includeShopLevels = true;
         public bool includeBossLevels = true;
-        [JsonProperty] public SerializedDictionary<ResourceType, int> startingResources = new SerializedDictionary<ResourceType, int>();
         public int startingHealth = 3;
 
-        [SerializedDictionary] public SerializedDictionary<ResourceType, int> runResources = new SerializedDictionary<ResourceType, int>();
+        [JsonProperty] [SerializedDictionary] public SerializedDictionary<ResourceType, int> runResources = new SerializedDictionary<ResourceType, int>();
         
         public LevelNode currentNode { get; set; }
         [JsonIgnore] public int currentTier => currentNode != null ? currentNode.tier : -1;

@@ -19,8 +19,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             base.Awake();
             
-            InitializeResourceDictionary();
-            
             GameManager.Instance.OnReturnToMenu += ResetResources;
         }
 
@@ -31,14 +29,20 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             GameManager.Instance.OnReturnToMenu -= ResetResources;
         }
         
-        private void InitializeResourceDictionary()
+        public void InitializeResourceDictionary(Dictionary<ResourceType, int> initialResources)
         {
             _gatheredResources.Clear();
             
             foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
             {
                 if (type != ResourceType.NONE)
-                    _gatheredResources[type] = 0;
+                {
+                    if (initialResources.TryGetValue(type, out int resourceAmount))
+                        _gatheredResources.Add(type, resourceAmount);
+                    else
+                        _gatheredResources.Add(type, 0);
+
+                }
             }
             
             OnResourcesReset?.Invoke();
@@ -47,7 +51,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         public void ResetResources()
         {
-            InitializeResourceDictionary();
+            InitializeResourceDictionary(new Dictionary<ResourceType, int>());
         }
 
         public void AddResource(ResourceType resourceType, int amount)
