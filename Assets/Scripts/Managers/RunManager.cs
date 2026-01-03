@@ -50,7 +50,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 includeShopLevels = includeShops,
                 includeBossLevels = includeBosses,
                 runResources = CalculateStartingResources(),
-                startingHealth = 3
+                startingHealth = 3,
+                health = 3
             };
 
             GenerateLevelTree(tiers, difficulty, includeShops, includeBosses);

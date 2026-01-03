@@ -49,6 +49,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             EnableControls();
 
             PlayerManager.Instance.RegisterPlayer(this);
+
+
         }
 
         private void Update()
@@ -56,6 +58,22 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             UpdateMovement();
             UpdateLook();
             UpdateShooter();
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if(other.gameObject.CompareTag("asteroid"))
+            {
+                other.GetComponent<Shootable>().destructionReason = DestructionReason.COLLISION_W_PLAYER;
+                Destroy(other.gameObject);
+                OnPlayerHit();
+            }
+        }
+
+        private void OnPlayerHit()
+        {
+            Debug.Log("player hit");
+            PlayerManager.Instance.PlayerHit();
         }
 
         private void UpdateMovement()
@@ -161,15 +179,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             yield return null;
 
             StartCoroutine(newBullet.Fire(aimDirection, bulletSpeed, bulletTimeToLive));
-        }
-
-        private void OnTriggerEnter2D(Collider2D other)
-        {
-            if(other.gameObject.CompareTag("asteroid"))
-            {
-                DisableControls();
-                PlayerManager.Instance.NotifyPlayerDeath();
-            }
         }
 
         public void DisableControls() => InputManager.Instance.DisableActionMap(ActionMapName.GAME);

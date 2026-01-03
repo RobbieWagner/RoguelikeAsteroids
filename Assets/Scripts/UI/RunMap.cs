@@ -44,8 +44,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void SetCanvasTransform(Run run)
         {
-            Vector2 canvasPos = canvasGroup.transform.position;
-            canvasPos += Vector2.down * tierDisplayDistance * (run.currentNode != null ? run.currentNode.tier : 0) * 1.95f;
+            Vector2 canvasPos = Vector2.down * tierDisplayDistance * (run.currentNode != null ? run.currentNode.tier : 0) * 2;
             Debug.Log(canvasPos);
             canvasGroup.transform.position = canvasPos; 
         }

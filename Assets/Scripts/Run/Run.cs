@@ -17,6 +17,24 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public bool includeShopLevels = true;
         public bool includeBossLevels = true;
         public int startingHealth = 3;
+        private int _health;
+        public int health 
+        { 
+            get 
+            {
+                return _health;
+            } 
+            set
+            {
+                Debug.Log($"{value} {_health}");
+                if (_health == value)
+                    return;
+                _health = value;
+                Debug.Log("hi");
+                OnUpdateHealth?.Invoke(_health);
+            } 
+        }
+        public event Action<int> OnUpdateHealth;
 
         [JsonProperty] [SerializedDictionary] public SerializedDictionary<ResourceType, int> runResources = new SerializedDictionary<ResourceType, int>();
         

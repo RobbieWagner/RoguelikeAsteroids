@@ -8,7 +8,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         NONE = -1,
         BULLET_HIT,
         OUT_OF_BOUNDS,
-        CLEANUP
+        CLEANUP,
+        COLLISION_W_PLAYER
     }
 
     public class Shootable : MonoBehaviour
@@ -18,7 +19,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private Rigidbody2D rb2d;
 
         public float boundsRadius;
-        private DestructionReason destructionReason = DestructionReason.NONE;
+        public DestructionReason destructionReason {get; set;}
 
         [SerializeField] private Collider2D shootableCollider;
         public ResourceGatherData resourceData = new ResourceGatherData();
@@ -26,6 +27,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         protected virtual void Awake() {
             GenerateRandomResources();
+            destructionReason = DestructionReason.NONE;
         }
 
         protected virtual void OnCollisionEnter2D(Collision2D collision)

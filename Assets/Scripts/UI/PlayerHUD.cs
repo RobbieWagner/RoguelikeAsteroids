@@ -21,6 +21,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private TextMeshProUGUI levelText;
         [SerializeField] private Slider timeSlider;
         [SerializeField] private Image timeSliderFill;
+
+        [Header("Health Display")]
+        [SerializeField] private LayoutGroup healthImageParent;
+        private List<Image> healthSprites = new List<Image>();
+        [SerializeField] private Image healthSpritePrefab;
         
         private Dictionary<ResourceType, ResourceUI> activeResourceUIs = new Dictionary<ResourceType, ResourceUI>();
         
@@ -45,8 +50,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             GameManager.Instance.OnReturnToMenu += HideHUD;
             GameManager.Instance.OnGameStart += ShowHUD;
+
+            RunManager.Instance.CurrentRun.OnUpdateHealth += UpdateHealthUI;
+            // update health graphic OnHealthUpdated (current run)
         }
-        
+
         private void InitializeResourceUI()
         {
             ClearResourceUIs();
@@ -222,13 +230,39 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             levelText.text = level.levelType.ToString();
             
-            foreach (var ui in activeResourceUIs.Values)
+            foreach (ResourceUI ui in activeResourceUIs.Values)
             {
                 if (ui != null)
                 {
                     int gatheredAmount = GetResourceAmount(ui.GetResourceType());
                     ui.UpdateAmount(gatheredAmount, 0, false);
                 }
+            }
+
+            RectTransform rectTransform = healthImageParent.GetComponent<RectTransform>();
+            int hearts = RunManager.Instance.CurrentRun.startingHealth;
+            float heartWidth = healthSpritePrefab.rectTransform.rect.width;
+            float spacing = 5f;
+            
+            float totalWidth = heartWidth * hearts + spacing * (hearts - 1);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, totalWidth);
+            UpdateHealthUI(RunManager.Instance.CurrentRun.health);
+        }
+
+        private void UpdateHealthUI(int health)
+        {
+            Debug.Log(health);
+            foreach(Image sprite in healthSprites)
+            {
+                if(sprite != null)
+                    Destroy(sprite.gameObject);
+            }
+            healthSprites.Clear();
+
+            for(int i = 0; i < health; i++)
+            {
+                Image sprite = Instantiate(healthSpritePrefab, healthImageParent.transform);
+                healthSprites.Add(sprite);
             }
         }
 
@@ -273,6 +307,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
                 GameManager.Instance.OnReturnToMenu -= HideHUD;
                 GameManager.Instance.OnGameStart -= ShowHUD;
+
+                RunManager.Instance.CurrentRun.OnUpdateHealth -= UpdateHealthUI;
         }
     }
 }

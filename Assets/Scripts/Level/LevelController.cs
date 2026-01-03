@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using RobbieWagnerGames.Managers;
 using UnityEngine;
 
@@ -18,7 +16,16 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected virtual void Awake()
         {
             RunManager.Instance.OnStartLevel += StartLevel;
-            PlayerManager.Instance.OnPlayerDied += OnPlayerDied;
+            PlayerManager.Instance.OnPlayerHit += OnPlayerHit;
+        }
+
+        private void OnPlayerHit(Player player)
+        {
+            Debug.Log("hello");
+            RunManager.Instance.CurrentRun.health--;
+            if (RunManager.Instance.CurrentRun.health == 0)
+                OnPlayerDied();
+            
         }
 
         protected virtual void Update()
@@ -49,7 +56,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             RunManager.Instance.FailRun();
         }
 
-        public void OnPlayerDied(Player player)
+        public void OnPlayerDied()
         {
 			if (failOnDeath)
 				FailLevel();
