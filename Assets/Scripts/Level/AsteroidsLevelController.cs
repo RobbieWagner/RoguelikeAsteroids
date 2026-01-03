@@ -15,6 +15,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         public Dictionary<ResourceType, int> collectedResources = new Dictionary<ResourceType, int>();
 
+        [SerializeField] private Transform parallaxFollow;
+        [SerializeField] private float parallaxSpeed;
+        private float startY;
+
         public event Action<ResourceType, int> OnResourceAdded;
         public event Action<Dictionary<ResourceType, int>> OnResourcesUpdated;
 
@@ -22,7 +26,14 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		{
             base.Awake();
 			levelTimer.OnTimerComplete += OnLevelTimerComplete;
+            startY = parallaxFollow.position.y;
 		}
+
+        protected override void Update()
+        {
+            base.Update();
+            parallaxFollow.position = new Vector2(parallaxFollow.position.x, levelTimer.timerValue * -parallaxSpeed); 
+        }
 
         protected override void StartLevel(Level level)
         {

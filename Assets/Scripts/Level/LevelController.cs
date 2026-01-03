@@ -21,6 +21,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             PlayerManager.Instance.OnPlayerDied += OnPlayerDied;
         }
 
+        protected virtual void Update()
+        {
+            
+        }
+
         protected virtual void StartLevel(Level level)
         {
             ConfigureLevel(level);
