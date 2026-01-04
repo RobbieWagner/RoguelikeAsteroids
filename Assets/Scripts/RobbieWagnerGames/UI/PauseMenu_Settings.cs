@@ -1,6 +1,5 @@
 using System.Collections;
 using RobbieWagnerGames.Managers;
-using RobbieWagnerGames.UI;
 using UnityEngine;
 using UnityEngine.UI;
 

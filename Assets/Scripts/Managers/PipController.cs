@@ -106,7 +106,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		
 		public void ClearAllPips()
 		{
-			foreach (var pip in activePips)
+			foreach (ResourcePip pip in activePips)
 			{
 				if (pip != null)
 				{
@@ -124,7 +124,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		{
 			List<ResourcePip> pipsToDestroy = activePips.Where(pip => pip.ResourceType == resourceType).ToList();
 			
-			foreach (var pip in pipsToDestroy)
+			foreach (ResourcePip pip in pipsToDestroy)
 			{
 				if (pip != null)
 				{

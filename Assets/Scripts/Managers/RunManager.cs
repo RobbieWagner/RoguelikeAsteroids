@@ -41,20 +41,20 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             ShowRunMenu();
         }
 
-        public void CreateNewRun(int tiers, float difficulty, bool includeShops, bool includeBosses)
+        public void CreateNewRun(int tiers, float difficulty, float shopRatio, bool includeBosses)
         {
             currentRun = new Run
             {
                 tiers = tiers,
                 difficulty = difficulty,
-                includeShopLevels = includeShops,
+                shopRatio = shopRatio,
                 includeBossLevels = includeBosses,
                 runResources = CalculateStartingResources(),
                 startingHealth = 3,
                 health = 3
             };
 
-            GenerateLevelTree(tiers, difficulty, includeShops, includeBosses);
+            GenerateLevelTree(tiers, difficulty, shopRatio, includeBosses);
             ResourceManager.Instance.InitializeResourceDictionary(currentRun.runResources);
 
             OnNewRunStarted?.Invoke(currentRun);
@@ -104,7 +104,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             currentRun = JsonDataService.Instance.LoadDataRelative<Run>(GameConstants.RunPath, null);
 
             if (currentRun == null)
-                CreateNewRun(defaultRun.tiers, defaultRun.difficulty, defaultRun.includeShopLevels, defaultRun.includeBossLevels);
+                CreateNewRun(defaultRun.tiers, defaultRun.difficulty, defaultRun.shopRatio, defaultRun.includeBossLevels);
             else
                 LoadRun();
 

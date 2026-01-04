@@ -71,8 +71,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if (resources == null) return;
             
-            foreach (var kvp in resources)
-                AddResource(kvp.Key, kvp.Value);
+            foreach (KeyValuePair<ResourceType, int> resource in resources)
+                AddResource(resource.Key, resource.Value);
         }
         
         public void RemoveResource(ResourceType resourceType, int amount)
@@ -95,9 +95,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if (requiredResources == null) return true;
             
-            foreach (var kvp in requiredResources)
+            foreach (KeyValuePair<ResourceType, int> resource in requiredResources)
             {
-                if (!HasResource(kvp.Key, kvp.Value))
+                if (!HasResource(resource.Key, resource.Value))
                     return false;
             }
             

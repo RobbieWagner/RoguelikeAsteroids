@@ -915,7 +915,7 @@ MonoBehaviour:
     runSeed: 0
     tiers: 15
     difficulty: 1
-    includeShopLevels: 1
+    shopRatio: 0
     includeBossLevels: 1
     startingHealth: 3
     runResources:

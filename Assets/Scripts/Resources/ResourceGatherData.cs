@@ -42,7 +42,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public int GetTotalResources()
         {
             int total = 0;
-            foreach (var resource in resources)
+            foreach (KeyValuePair<ResourceType, int> resource in resources)
             {
                 if (resource.Key != ResourceType.NONE)
                     total += resource.Value;

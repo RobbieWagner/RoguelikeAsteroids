@@ -174,7 +174,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if (collectedResources == null) return;
             
-            foreach (var resource in collectedResources)
+            foreach (KeyValuePair<ResourceType, int> resource in collectedResources)
             {
                 if (resource.Key != ResourceType.NONE)
                 {

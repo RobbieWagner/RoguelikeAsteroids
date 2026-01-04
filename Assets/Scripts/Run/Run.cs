@@ -14,7 +14,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         // Configuration
         [Range(2,15)] public int tiers = 5;
         public float difficulty = 1f;
-        public bool includeShopLevels = true;
+        public float shopRatio = .1f;
         public bool includeBossLevels = true;
         public int startingHealth = 3;
         private int _health;

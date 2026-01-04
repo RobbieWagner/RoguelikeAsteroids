@@ -6,7 +6,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 {
 	public partial class RunManager : MonoBehaviourSingleton<RunManager>
 	{
-		private void GenerateLevelTree(int tiers, float difficulty, bool includeShops, bool includeBosses)
+		private void GenerateLevelTree(int tiers, float difficulty, float shopRatio, bool includeBosses)
         {
             currentRun.levelTree.Clear();
             
@@ -14,7 +14,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 currentRun.levelTree.Add(new List<LevelNode>());
             
             GenerateRootLevel(difficulty);
-            GenerateMiddleTiers(tiers, difficulty, includeShops, includeBosses);
+            GenerateMiddleTiers(tiers, difficulty, shopRatio, includeBosses);
             GenerateBossLevel(tiers, difficulty, includeBosses);
 
             RunTreeBuilder.ConnectLevelNodes(currentRun.levelTree);
@@ -35,18 +35,55 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             currentRun.levelTree[0].Add(rootNode);
         }
 
-        private void GenerateMiddleTiers(int totalTiers, float baseDifficulty, bool includeShops, bool includeBosses)
+        private void GenerateMiddleTiers(int totalTiers, float baseDifficulty, float shopRatio = .1f, bool includeBosses = true)
         {
+            List<int> levelCountsPerTier = new List<int>();
+            int totalLevels = 0;
+            
             for (int tier = 1; tier < totalTiers - 1; tier++)
             {
-                int levelCount = Random.Range(2, 4);
+                int levelCount = Random.Range(2, 5);
+                levelCountsPerTier.Add(levelCount);
+                totalLevels += levelCount;
+            }
+            
+            int shopCount = Mathf.RoundToInt(totalLevels * shopRatio);
+            
+            List<(int tier, int position)> allPositions = new List<(int tier, int position)>();
+            int currentTier = 1;
+            
+            foreach (int levelCount in levelCountsPerTier)
+            {
+                for (int position = 0; position < levelCount; position++)
+                {
+                    allPositions.Add((currentTier, position));
+                }
+                currentTier++;
+            }
+            
+            List<int> shopIndices = new List<int>();
+           
+            for (int i = 0; i < shopCount; i++)
+            {
+                int randomIndex;
+                do
+                {
+                    randomIndex = Random.Range(0, allPositions.Count);
+                } while (shopIndices.Contains(randomIndex));
+                
+                shopIndices.Add(randomIndex);
+            }
+            
+            int positionIndex = 0;
+            for (int tierIndex = 0; tierIndex < levelCountsPerTier.Count; tierIndex++)
+            {
+                int tier = tierIndex + 1;
+                int levelCount = levelCountsPerTier[tierIndex];
                 
                 for (int position = 0; position < levelCount; position++)
                 {
-                    LevelType levelType = LevelType.ASTEROIDS;
-                    
-                    if (includeShops && ShouldBeShopLevel(tier, position))
-                        levelType = LevelType.SHOP;
+                    bool isShop = shopIndices.Contains(positionIndex);
+                    LevelType levelType = isShop ? LevelType.SHOP : LevelType.ASTEROIDS;
                     
                     Level level = CreateLevel(levelType, tier, baseDifficulty);
                     LevelNode node = new LevelNode
@@ -57,6 +94,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                     };
                     
                     currentRun.levelTree[tier].Add(node);
+                    positionIndex++;
                 }
             }
         }
@@ -78,12 +116,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             };
             
             currentRun.levelTree[lastTier].Add(bossNode);
-        }
-
-        private bool ShouldBeShopLevel(int tier, int position)
-        {
-            int totalPositionInTree = tier * 3 + position;
-            return (totalPositionInTree + 1) % 3 == 0;
         }
 
         private Level CreateLevel(LevelType type, int tier, float baseDifficulty)

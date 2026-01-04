@@ -48,7 +48,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             levelController.OnLevelFailed -= StopAndClearAllShootables;
             levelController.OnLevelCompleted -= StopAndClearAllShootables;
             
-            foreach (var shootable in spawnedShootables)
+            foreach (Shootable shootable in spawnedShootables)
             {
                 if (shootable != null)
                     shootable.OnShootableDestroyed -= HandleShootableDestroyed;
@@ -146,7 +146,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void ClearAllShootables()
         {
-            foreach(var shootable in spawnedShootables)
+            foreach(Shootable shootable in spawnedShootables)
             {
                 if(shootable != null)
                 {
