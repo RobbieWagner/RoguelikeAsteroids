@@ -73,7 +73,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private IEnumerator ReturnToMenuCo()
         {
             yield return SceneLoadManager.Instance.UnloadScene("RunScene", false);
-            yield return SceneLoadManager.Instance.LoadSceneAdditive("MenuScene", true, () => {InputManager.Instance.DisableActionMap(ActionMapName.PAUSE);});
+            yield return SceneLoadManager.Instance.LoadSceneAdditive("MenuScene", true, () => { InputManager.Instance.DisableActionMap(ActionMapName.PAUSE); });
             OnReturnToMenu?.Invoke();
             sceneTransitionCo = null;
         }

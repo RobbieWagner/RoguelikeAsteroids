@@ -34,7 +34,6 @@ namespace RobbieWagnerGames.UI
             resumeButton.gameObject.SetActive(false);
             settingsButton.gameObject.SetActive(false);
             mainMenuButton.gameObject.SetActive(false);
-            quitAppButton.gameObject.SetActive(false);
             
             settingsMenuPanel.SetActive(true);
             
@@ -71,7 +70,6 @@ namespace RobbieWagnerGames.UI
             resumeButton.gameObject.SetActive(true);
             settingsButton.gameObject.SetActive(true);
             mainMenuButton.gameObject.SetActive(true);
-            quitAppButton.gameObject.SetActive(true);
             
             firstSelected = previouslySelected != null ? previouslySelected : resumeButton;
             SetupNavigation();

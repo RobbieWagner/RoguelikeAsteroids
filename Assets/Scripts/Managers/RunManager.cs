@@ -165,7 +165,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if (currentRun == null) return;
 
-            StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"},true,() => {RunManager.Instance.FailRun();},false));
+            StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"},true));
             
             OnRunFailed?.Invoke(currentRun);
             EndRun(false);
@@ -175,7 +175,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             Run completedRun = currentRun;
             currentRun = null;
-
+            DeleteRunData();
             OnRunEnded?.Invoke(completedRun);
         }
 
@@ -195,10 +195,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public void RestartGame()
         {
             if(returnToMenuCo != null) return;
+            DeleteRunData();
             returnToMenuCo = StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => {GameManager.Instance.RestartGame();}, false));
         }
 
-        private void SaveRunData()
+        public void SaveRunData()
         {
             CurrentRun.PrepForSerialization();
             currentRun.runResources.Clear();
@@ -207,6 +208,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             if(!JsonDataService.Instance.SaveData(GameConstants.RunPath, CurrentRun))
                 throw new InvalidOperationException("Could not save run data");
+        }
+
+        private void DeleteRunData()
+        {
+            JsonDataService.Instance.DeleteData(GameConstants.RunPath);
         }
 
         protected override void OnDestroy()

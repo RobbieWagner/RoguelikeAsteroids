@@ -86,6 +86,33 @@ namespace RobbieWagnerGames.Utilities.SaveData
             return await Task.Run(() => LoadData(path, defaultData, saveDefaultIfMissing, isEncrypted));
         }
 
+        public bool DeleteData(string relativePath)
+        {
+            string path = CreateValidDataPath(relativePath);
+            return DeleteDataInternal(path);
+        }
+
+        private bool DeleteDataInternal(string fullPath)
+        {
+            try
+            {
+                if (!File.Exists(fullPath))
+                {
+                    Debug.LogWarning($"File not found at path: {fullPath}. Nothing to delete.");
+                    return true;
+                }
+                
+                File.Delete(fullPath);
+                Debug.Log($"Successfully deleted file at path: {fullPath}");
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to delete data: {e.Message}");
+                return false;
+            }
+        }
+
         public bool PurgeData()
         {
             string path = StaticGameStats.SaveData.PersistentDataPath;

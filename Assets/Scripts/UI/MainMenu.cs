@@ -42,7 +42,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void OnExitButtonClicked()
         {
             BasicAudioManager.Instance.Play(AudioSourceName.UIExit);
-            QuitApplication();
+            PromptManager.Instance.ShowConfirmationPrompt(
+                "Are You Sure?",
+                "Are you sure you would like to close the application?",
+                () => QuitApplication(),
+                null
+            );
         }
 
         private void QuitApplication()

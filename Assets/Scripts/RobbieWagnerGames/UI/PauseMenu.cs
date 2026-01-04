@@ -16,7 +16,6 @@ namespace RobbieWagnerGames.UI
         [SerializeField] private Button resumeButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button mainMenuButton;
-		[SerializeField] private Button quitAppButton;
         
         [SerializeField] private bool pauseTime = true;
         
@@ -39,7 +38,6 @@ namespace RobbieWagnerGames.UI
             resumeButton.onClick.AddListener(ResumeGame);
             settingsButton.onClick.AddListener(OpenSettings);
             mainMenuButton.onClick.AddListener(ReturnToMainMenu);
-			quitAppButton.onClick.AddListener(QuitApplication);
             
             firstSelected = resumeButton;
             
@@ -74,12 +72,10 @@ namespace RobbieWagnerGames.UI
             resumeButton.onClick.RemoveAllListeners();
             settingsButton.onClick.RemoveAllListeners();
             mainMenuButton.onClick.RemoveAllListeners();
-			quitAppButton.onClick.RemoveAllListeners();
         }
         
         private void OnPauseGamePerformed(InputAction.CallbackContext context)
         {
-
             if (!isPaused)
                 PauseGame();
         }
@@ -130,16 +126,12 @@ namespace RobbieWagnerGames.UI
             Close();
             isPaused = false;
 
-			RunManager.Instance.ReturnToMainMenu();
-        }
-
-		private void QuitApplication()
-        {
-            #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-            #else
-                Application.Quit();
-            #endif
+            PromptManager.Instance.ShowConfirmationPrompt(
+                "Are you sure?",
+                "Any unsaved progress will be lost. Are you sure you would like to quit?",
+                () => { RunManager.Instance.ReturnToMainMenu(); },
+                null
+            );
         }
         
         public override void Open()
@@ -149,7 +141,6 @@ namespace RobbieWagnerGames.UI
             resumeButton.interactable = true;
             settingsButton.interactable = true;
             mainMenuButton.interactable = true;
-            quitAppButton.interactable = true;
             
             if (firstSelected != null)
                 StartCoroutine(DelayedForceSelect(firstSelected));
