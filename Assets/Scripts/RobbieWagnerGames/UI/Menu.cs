@@ -193,6 +193,7 @@ namespace RobbieWagnerGames.UI
             InputManager.Instance.EnableActionMap(ActionMapName.UI);
             
             canvas.enabled = true;
+            Debug.Log("open");
             
             isUsingController = false;
             lastMouseActivityTime = Time.time - mouseInactivityTimeout;
@@ -207,6 +208,7 @@ namespace RobbieWagnerGames.UI
         {
             if (canvas == null) 
                 canvas = GetComponent<Canvas>();
+            Debug.Log("close");
             canvas.enabled = false;
             
             StopSelectionMaintenance();
@@ -234,7 +236,7 @@ namespace RobbieWagnerGames.UI
                 Open();
         }
         
-        public void RefreshSelectableElements()
+        public virtual void RefreshSelectableElements()
         {
             selectableElements.Clear();
             
@@ -522,7 +524,7 @@ namespace RobbieWagnerGames.UI
             OnMouseClicked();
         }
         
-        private void ResetControllerNavigation()
+        protected void ResetControllerNavigation()
         {
             canNavigateWithController = true;
         }

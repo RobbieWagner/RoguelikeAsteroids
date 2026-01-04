@@ -9,6 +9,7 @@ namespace RobbieWagnerGames.UI
     {
         [Header("Settings Menu")]
         [SerializeField] private GameObject settingsMenuPanel;
+        [SerializeField] private SettingsMenu settingsMenu;
         [SerializeField] private Button settingsBackButton;
         private Selectable previouslySelected = null;
         private bool isSettingsOpen = false;
@@ -20,6 +21,9 @@ namespace RobbieWagnerGames.UI
             
             if (settingsToggleCoroutine == null)
                 settingsToggleCoroutine = StartCoroutine(OpenSettingsMenuCoroutine());
+
+            settingsBackButton.onClick.RemoveAllListeners();
+            settingsBackButton.onClick.AddListener(CloseSettingsMenu);
         }
 
         private IEnumerator OpenSettingsMenuCoroutine()
@@ -27,7 +31,6 @@ namespace RobbieWagnerGames.UI
             yield return new WaitForSecondsRealtime(.02f);
 
             isSettingsOpen = true;
-
             previouslySelected = EventSystemManager.Instance?.CurrentSelected?.GetComponent<Selectable>();
 
             resumeButton.gameObject.SetActive(false);
@@ -35,16 +38,10 @@ namespace RobbieWagnerGames.UI
             mainMenuButton.gameObject.SetActive(false);
             
             settingsMenuPanel.SetActive(true);
-            
-            if (settingsBackButton != null)
-            {
-                settingsBackButton.onClick.RemoveAllListeners();
-                settingsBackButton.onClick.AddListener(CloseSettingsMenu);
-
-                firstSelected = settingsBackButton;
-                RefreshSelectableElements();
-                SetupNavigation();
-            }
+ 
+            settingsMenu.Open();
+        
+            settingsMenu.RefreshSelectableElements();
 
             settingsToggleCoroutine = null;
         }
@@ -59,11 +56,13 @@ namespace RobbieWagnerGames.UI
 
         private IEnumerator CloseSettingsMenuCoroutine()
         {
-            yield return new WaitForSecondsRealtime(.02f);
+            yield return null;
 
-            Debug.Log("close");
             isSettingsOpen = false;
 
+            if (settingsMenu != null)
+                settingsMenu.Close();
+            
             settingsMenuPanel.SetActive(false);
             
             resumeButton.gameObject.SetActive(true);
@@ -71,6 +70,7 @@ namespace RobbieWagnerGames.UI
             mainMenuButton.gameObject.SetActive(true);
             
             firstSelected = previouslySelected != null ? previouslySelected : resumeButton;
+            RefreshSelectableElements();
             SetupNavigation();
 
             settingsToggleCoroutine = null;

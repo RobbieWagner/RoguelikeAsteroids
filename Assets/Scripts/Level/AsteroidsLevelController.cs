@@ -17,7 +17,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         [SerializeField] private Transform parallaxFollow;
         [SerializeField] private float parallaxSpeed;
-        private float startY;
 
         public event Action<ResourceType, int> OnResourceAdded;
         public event Action<Dictionary<ResourceType, int>> OnResourcesUpdated;
@@ -26,7 +25,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		{
             base.Awake();
 			levelTimer.OnTimerComplete += OnLevelTimerComplete;
-            startY = parallaxFollow.position.y;
 		}
 
         protected override void Update()
