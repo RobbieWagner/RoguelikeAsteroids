@@ -1,12 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using RobbieWagnerGames.UI;
+using RobbieWagnerGames.Managers;
 using UnityEngine;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
-    public class RunMap : MonoBehaviour
+    public partial class RunMap : MonoBehaviour
     {
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private Canvas nodeCanvas;
@@ -24,29 +23,18 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private float sideBuffer;
         [SerializeField] private Vector2 baseNodePlacement;
 
-        protected void Awake()
-        {
-            RunManager.Instance.OnRunContinued += DisplayRunUI;
-            RunManager.Instance.OnStartLevel += HideRunUI;
-        }
-
         private void DisplayRunUI(Run run)
         {
             ClearUI();
             InstantiateNodes(run);
             InstantiateConnections(run);
-            ConfigureIntractability(run);
+            ConfigureInteractability(run);
             SetCanvasTransform(run);
 
             canvasGroup.alpha = 1;
             canvasGroup.interactable = true;
-        }
-
-        private void SetCanvasTransform(Run run)
-        {
-            Vector2 canvasPos = Vector2.down * tierDisplayDistance * (run.currentNode != null ? run.currentNode.tier : 0) * 2;
-            Debug.Log(canvasPos);
-            canvasGroup.transform.position = canvasPos; 
+            
+            StartSelectionMaintenance();
         }
 
         private void HideRunUI(Level level)
@@ -54,6 +42,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             ClearUI();
             canvasGroup.alpha = 0;
             canvasGroup.interactable = false;
+            
+            navigateAction = null;
+            submitAction = null;
+            pointAction = null;
+            clickAction = null;
+            cancelAction = null;
+            StopSelectionMaintenance();
         }
 
         private void ClearUI()
@@ -65,6 +60,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             foreach(LineRenderer renderer in lineRendererInstances)
                 Destroy(renderer.gameObject);
             lineRendererInstances.Clear();
+            
+            ClearSelection();
+            
+            pastButtons.Clear();
+            presentButtons.Clear();
+            futureButtons.Clear();
         }
 
         private void InstantiateNodes(Run run)
@@ -87,7 +88,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                     button.transform.localPosition = new Vector3(nodeXPos, nodeYPos, 0);
                     button.level = nodes[j].level;
                     button.levelNode = nodes[j];
+
                     UpdateButtonAppearance(button);
+                    button.button.onClick.AddListener(() => SelectButton(button));
                     
                     levelButtonInstances.Add(button);
                 }
@@ -96,8 +99,19 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void UpdateButtonAppearance(LevelButton button)
         {
+            if (button.button.image == null) 
+                return;
+            
             button.button.image.sprite = GameConstants.Instance.levelIcons[button.level.levelType];
-            button.button.image.color = GameConstants.Instance.levelColors[button.level.levelType];
+            
+            if (button.button.interactable)
+                button.button.image.color = GameConstants.Instance.levelColors[button.level.levelType];
+            else
+            {
+                Color color = GameConstants.Instance.levelColors[button.level.levelType];
+                color *= 0.5f;
+                button.button.image.color = color;
+            }
         }
 
         private void InstantiateConnections(Run run)
@@ -158,18 +172,18 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             lineRenderer.endColor = GameConstants.Instance.levelColors[toNode.level.levelType];
         }
         
-        private void ConfigureIntractability(Run run)
+        private void ConfigureInteractability(Run run)
         {
             LevelNode currentNode = run.currentNode;
 
             foreach (LevelButton button in levelButtonInstances)
                 button.DisableButton();
 
-            List<LevelButton> presentButtons = new List<LevelButton>();
-            List<LevelButton> futureButtons = new List<LevelButton>();
-            List<LevelButton> pastButtons = new List<LevelButton>();
+            presentButtons.Clear();
+            pastButtons.Clear();
+            futureButtons.Clear();
 
-            if (currentNode == null) // if no current node, enable the root nodes only
+            if (currentNode == null)
             {
                 presentButtons.AddRange(levelButtonInstances.Where(b => b.levelNode.tier == 0));
                 futureButtons.AddRange(levelButtonInstances.Where(b => b.levelNode.tier != 0));
@@ -243,6 +257,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 pastColor *= 0.2f;
                 button.button.image.color = pastColor;
             }
+        }
+
+        private void SetCanvasTransform(Run run)
+        {
+            Vector2 canvasPos = Vector2.down * tierDisplayDistance * (run.currentNode != null ? run.currentNode.tier : 0) * 2;
+            canvasGroup.transform.position = canvasPos; 
         }
     }
 }

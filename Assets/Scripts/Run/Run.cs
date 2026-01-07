@@ -26,11 +26,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             } 
             set
             {
-                Debug.Log($"{value} {_health}");
                 if (_health == value)
                     return;
                 _health = value;
-                Debug.Log("hi");
                 OnUpdateHealth?.Invoke(_health);
             } 
         }
