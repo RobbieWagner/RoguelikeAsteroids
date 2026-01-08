@@ -10,6 +10,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private Button playButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button exitButton;
+        public override bool IsOpen => base.IsOpen && !isSettingsOpen;
 
         protected override void Awake() 
         {
@@ -88,8 +89,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             settingsButton.onClick.RemoveAllListeners();
             exitButton.onClick.RemoveAllListeners();
             
-            if (settingsBackButton != null)
-                settingsBackButton.onClick.RemoveAllListeners();
+            if (settingsMenu.backButton != null)
+                settingsMenu.backButton.onClick.RemoveAllListeners();
         }
     }
 }

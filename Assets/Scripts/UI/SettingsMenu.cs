@@ -4,11 +4,15 @@ using UnityEngine.Audio;
 using RobbieWagnerGames.Managers;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 namespace RobbieWagnerGames.UI
 {
     public class SettingsMenu : Menu
     {
+        [Header("General")]
+        public Button backButton;
+
         [Header("Tab Management")]
         [SerializeField] private GameObject graphicsTab;
         [SerializeField] private GameObject audioTab;
@@ -25,14 +29,13 @@ namespace RobbieWagnerGames.UI
         [SerializeField] private AudioMixer audioMixer;
         
         private Tab currentTab = Tab.GRAPHICS;
-        private List<Selectable> currentTabSelectables = new List<Selectable>();
         
         private enum Tab
         {
             GRAPHICS,
             AUDIO
         }
-        
+
         protected override void Awake()
         {
             base.Awake();
@@ -44,13 +47,12 @@ namespace RobbieWagnerGames.UI
             fullscreenToggle.onValueChanged.AddListener(OnFullscreenToggled);
             
             SetupAudioSliders();
-            SwitchTab(Tab.GRAPHICS);
         }
-        
+
         protected override void OnEnable()
         {
             base.OnEnable();
-			InputManager.Instance.Controls.UI.NavigateTabs.performed += OnNavigateTabsPerformed;
+            InputManager.Instance.Controls.UI.NavigateTabs.performed += OnNavigateTabsPerformed;
         }
         
         protected override void OnDisable()
@@ -58,7 +60,105 @@ namespace RobbieWagnerGames.UI
             base.OnDisable();
             InputManager.Instance.Controls.UI.NavigateTabs.performed -= OnNavigateTabsPerformed;
         }
-        
+
+        protected override void Update()
+        {
+            if (!IsOpen) return;
+            
+            HandleInputModeDetection();
+            HandleControllerNavigation();
+            HandleMouseNavigation();
+            CheckForLostSelection();
+        }
+
+        protected override void ForceControllerMode()
+        {
+            if (!EventSystemManager.Instance.HasSelection())
+                RestoreOrSetDefaultSelection();
+        }
+
+        protected override void CheckForLostSelection()
+        {
+            if (!IsOpen || !maintainSelectionAlways || !isUsingController) return;
+            
+            if (!EventSystemManager.Instance.HasSelection())
+                RestoreOrSetDefaultSelection();
+        }
+
+        protected override void HandleControllerNavigation()
+        {
+            if (!isUsingController || !canNavigateWithController) return;
+            
+            InputAction navigateAction = InputManager.Instance.GetAction(ActionMapName.UI, "Navigate");
+            if (navigateAction != null)
+            {
+                Vector2 input = navigateAction.ReadValue<Vector2>();
+                
+                if (input != Vector2.zero && (lastControllerInput == Vector2.zero || Time.time - lastControllerNavigationTime > controllerRepeatRate))
+                {
+                    HandleNavigationInput(input);
+                    lastControllerNavigationTime = Time.time;
+                }
+                else if (input == Vector2.zero && lastControllerInput != Vector2.zero)
+                    canNavigateWithController = true;
+                
+                lastControllerInput = input;
+            }
+        }
+
+        protected override void HandleNavigationInput(Vector2 input)
+        {
+            bool inputHandled = false;
+            
+            if (Mathf.Abs(input.y) > Mathf.Abs(input.x))
+            {
+                if (input.y > 0.5f)
+                    inputHandled = true;
+                else if (input.y < -0.5f) 
+                    inputHandled = true;
+            }
+            else
+            {
+                if (input.x < -0.5f)
+                {
+                    HandleHorizontalNavigation(-1);
+                    inputHandled = true;
+                }
+                else if (input.x > 0.5f)
+                {
+                    HandleHorizontalNavigation(1);
+                    inputHandled = true;
+                }
+            }
+            
+            if (inputHandled)
+            {
+                canNavigateWithController = false;
+                Invoke(nameof(ResetControllerNavigation), controllerNavigationDelay);
+            }
+        }
+
+        private void HandleHorizontalNavigation(int direction)
+        {
+            GameObject selected = EventSystemManager.Instance.CurrentSelected;
+            if (selected == null) return;
+            
+            Selectable currentElement = selected.GetComponent<Selectable>();
+            if (currentElement == null) return;
+            
+            if (currentElement is Slider slider)
+            {
+                float step = (slider.maxValue - slider.minValue) / 20f;
+                slider.value += direction * step;
+                slider.onValueChanged?.Invoke(slider.value);
+            }
+            else if (currentElement is Toggle toggle)
+            {
+                toggle.isOn = !toggle.isOn;
+                toggle.onValueChanged?.Invoke(toggle.isOn);
+            }
+        }
+
         private void SetupAudioSliders()
         {
             float masterVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
@@ -81,10 +181,12 @@ namespace RobbieWagnerGames.UI
             
             UpdateAudioMixer();
         }
-        
+
         private void SwitchTab(Tab tab)
-        {
+        {   
             if (currentTab == tab) return;
+            
+            EventSystemManager.Instance.SetSelected(null);
             
             currentTab = tab;
             
@@ -95,13 +197,35 @@ namespace RobbieWagnerGames.UI
             RefreshSelectableElements();
             
             if (tab == Tab.GRAPHICS)
+            {
+                Navigation backButtonNav = backButton.navigation;
+                backButtonNav.mode = Navigation.Mode.Explicit;
+                backButtonNav.selectOnUp = fullscreenToggle;
+                backButtonNav.selectOnDown = fullscreenToggle;
+                backButton.navigation = backButtonNav;
+
                 firstSelected = fullscreenToggle;
-            else
+            }
+            else if (tab == Tab.AUDIO)
+            {
+                Navigation backButtonNav = backButton.navigation;
+                backButtonNav.mode = Navigation.Mode.Explicit;
+                backButtonNav.selectOnUp = playerVolumeSlider;
+                backButtonNav.selectOnDown = masterVolumeSlider;
+                backButton.navigation = backButtonNav;
+
                 firstSelected = masterVolumeSlider;
-            
+            }
+
+            StartCoroutine(SwitchTabDelayed());
+        }
+
+        private IEnumerator SwitchTabDelayed()
+        {
+            yield return new WaitForSecondsRealtime(.1f);
             SetupNavigation();
         }
-        
+
         private void UpdateTabButtonVisuals()
         {
             ColorBlock graphicsColors = graphicsTabButton.colors;
@@ -121,192 +245,24 @@ namespace RobbieWagnerGames.UI
             graphicsTabButton.colors = graphicsColors;
             audioTabButton.colors = audioColors;
         }
-        
-        public override void RefreshSelectableElements()
-        {
-            base.RefreshSelectableElements();
-            
-            currentTabSelectables.Clear();
-            
-            currentTabSelectables.Add(graphicsTabButton);
-            currentTabSelectables.Add(audioTabButton);
-            
-            if (currentTab == Tab.GRAPHICS)
-            {
-                foreach (Selectable selectable in selectableElements)
-                {
-                    if (selectable.transform.IsChildOf(graphicsTab.transform) && 
-                        selectable != graphicsTabButton && 
-                        selectable != audioTabButton)
-					{
-                        currentTabSelectables.Add(selectable);
-					}
-				}
-            }
-            else
-            {
-                foreach (Selectable selectable in selectableElements)
-                {
-                    if (selectable.transform.IsChildOf(audioTab.transform) && 
-                        selectable != graphicsTabButton && 
-                        selectable != audioTabButton)
-                    {
-                        currentTabSelectables.Add(selectable);
-                    }
-                }
-            }
-            
-            currentTabSelectables.Sort((a, b) =>
-            {
-                Vector3 aPos = a.transform.position;
-                Vector3 bPos = b.transform.position;
-                return bPos.y.CompareTo(aPos.y);
-            });
-        }
-        
-        protected override void HandleNavigationInput(Vector2 input)
-        {
-            if (currentTabSelectables.Count == 0) return;
-            
-            bool inputHandled = false;
-            
-            if (Mathf.Abs(input.y) > Mathf.Abs(input.x))
-            {
-                if (input.y > 0.5f)
-                {
-                    NavigateVertical(-1);
-                    inputHandled = true;
-                }
-                else if (input.y < -0.5f)
-                {
-                    NavigateVertical(1);
-                    inputHandled = true;
-                }
-            }
-            else
-            {
-                if (input.x < -0.5f || input.x > 0.5f)
-                {
-                    NavigateHorizontal(input.x > 0 ? 1 : -1);
-                    inputHandled = true;
-                }
-            }
-            
-            if (inputHandled)
-            {
-                canNavigateWithController = false;
-                Invoke(nameof(ResetControllerNavigation), controllerNavigationDelay);
-            }
-        }
-        
-        protected override void NavigateVertical(int direction)
-        {
-            if (currentTabSelectables.Count == 0) return;
-            
-            int newIndex = currentSelectedIndex;
-            int attempts = 0;
-            
-            do
-            {
-                newIndex += direction;
-                
-                if (wrapNavigation)
-                {
-                    if (newIndex < 0) 
-						newIndex = currentTabSelectables.Count - 1;
-                    else if (newIndex >= currentTabSelectables.Count) 
-						newIndex = 0;
-                }
-                else
-                    newIndex = Mathf.Clamp(newIndex, 0, currentTabSelectables.Count - 1);
-                
-                attempts++;
-                
-                if (attempts > currentTabSelectables.Count)
-                {
-                    Debug.LogWarning("Failed to find valid element to navigate to", this);
-                    return;
-                }
-                
-            } while (!currentTabSelectables[newIndex].interactable || 
-                     !currentTabSelectables[newIndex].gameObject.activeInHierarchy);
-            
-            currentSelectedIndex = newIndex;
-            ForceSelectElement(currentTabSelectables[currentSelectedIndex]);
-        }
-        
-        protected override void NavigateHorizontal(int direction)
-        {
-            if (currentSelectedIndex < 0 || currentSelectedIndex >= currentTabSelectables.Count) return;
-            
-            Selectable currentElement = currentTabSelectables[currentSelectedIndex];
-            
-            if (currentElement is Slider slider)
-            {
-                float step = (slider.maxValue - slider.minValue) / 20f;
-                slider.value += direction * step;
-                slider.onValueChanged?.Invoke(slider.value);
-            }
-            else if (currentElement is Toggle toggle)
-            {
-                toggle.isOn = !toggle.isOn;
-                toggle.onValueChanged?.Invoke(toggle.isOn);
-            }
-            else if (currentElement is Button button && (button == graphicsTabButton || button == audioTabButton))
-                return;
-            else
-                base.NavigateHorizontal(direction);
-        }
-        
+
         private void OnNavigateTabsPerformed(InputAction.CallbackContext context)
         {
             if (!IsOpen) return;
             
             float value = context.ReadValue<float>();
             
-            if (value > 0.5f)
-                SwitchTab(currentTab == Tab.GRAPHICS ? Tab.AUDIO : Tab.GRAPHICS);
-            else if (value < -0.5f)
-                SwitchTab(currentTab == Tab.GRAPHICS ? Tab.AUDIO : Tab.GRAPHICS);
-        }
-        
-        protected override void SetupNavigation()
-        {
-            RefreshSelectableElements();
-            
-            isUsingController = true;
-            lastMouseActivityTime = Time.time - mouseInactivityTimeout;
-            
-            Selectable elementToSelect = firstSelected;
-            
-            if (elementToSelect == null || !elementToSelect.interactable || !elementToSelect.gameObject.activeInHierarchy)
+            if (value > 0.5f || value < -0.5f)
             {
-                foreach (Selectable element in currentTabSelectables)
-                {
-                    if (element.interactable && element.gameObject.activeInHierarchy)
-                    {
-                        elementToSelect = element;
-                        break;
-                    }
-                }
-            }
-            
-            if (elementToSelect != null)
-            {
-                ForceSelectElement(elementToSelect);
-                currentSelectedIndex = currentTabSelectables.IndexOf(elementToSelect);
+                Tab newTab = currentTab == Tab.GRAPHICS ? Tab.AUDIO : Tab.GRAPHICS;
+                SwitchTab(newTab);
             }
         }
-        
-        protected override void HandleCancel()
-        {
-            Close();
-        }
-        
+
         public override void Open()
         {
             base.Open();
-            SwitchTab(Tab.GRAPHICS);
+            SwitchTab(Tab.AUDIO);
         }
         
         public override void Close()
@@ -314,7 +270,29 @@ namespace RobbieWagnerGames.UI
             base.Close();
             SaveSettings();
         }
-        
+
+        private void UpdateAudioMixer()
+        {
+            if (audioMixer == null) return;
+            
+            float masterVolume = Mathf.Lerp(-80f, 0f, masterVolumeSlider.value);
+            float musicVolume = Mathf.Lerp(-80f, 0f, musicVolumeSlider.value);
+            float uiVolume = Mathf.Lerp(-80f, 0f, uiVolumeSlider.value);
+            float hazardVolume = Mathf.Lerp(-80f, 0f, hazardVolumeSlider.value);
+            float playerVolume = Mathf.Lerp(-80f, 0f, playerVolumeSlider.value);
+            
+            audioMixer.SetFloat("MasterVolume", masterVolume);
+            audioMixer.SetFloat("MusicVolume", musicVolume);
+            audioMixer.SetFloat("UIVolume", uiVolume);
+            audioMixer.SetFloat("HazardVolume", hazardVolume);
+            audioMixer.SetFloat("PlayerVolume", playerVolume);
+        }
+
+        private void SaveSettings()
+        {
+            PlayerPrefs.Save();
+        }
+
         private void OnFullscreenToggled(bool isFullscreen)
         {
             Screen.fullScreen = isFullscreen;
@@ -350,29 +328,12 @@ namespace RobbieWagnerGames.UI
             PlayerPrefs.SetFloat("PlayerVolume", value);
             UpdateAudioMixer();
         }
-        
-        private void UpdateAudioMixer()
+
+        protected override void OnElementSelected(Selectable element)
         {
-            if (audioMixer == null) return;
-            
-            float masterVolume = Mathf.Lerp(-80f, 0f, masterVolumeSlider.value);
-            float musicVolume = Mathf.Lerp(-80f, 0f, musicVolumeSlider.value);
-            float uiVolume = Mathf.Lerp(-80f, 0f, uiVolumeSlider.value);
-            float hazardVolume = Mathf.Lerp(-80f, 0f, hazardVolumeSlider.value);
-            float playerVolume = Mathf.Lerp(-80f, 0f, playerVolumeSlider.value);
-            
-            audioMixer.SetFloat("MasterVolume", masterVolume);
-            audioMixer.SetFloat("MusicVolume", musicVolume);
-            audioMixer.SetFloat("UIVolume", uiVolume);
-            audioMixer.SetFloat("HazardVolume", hazardVolume);
-            audioMixer.SetFloat("PlayerVolume", playerVolume);
+            base.OnElementSelected(element);
         }
-        
-        private void SaveSettings()
-        {
-            PlayerPrefs.Save();
-        }
-        
+
         protected override void OnDestroy()
         {
             base.OnDestroy();

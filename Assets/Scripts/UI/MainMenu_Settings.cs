@@ -11,7 +11,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [Header("Settings Menu")]
         [SerializeField] private GameObject settingsMenuPanel;
         [SerializeField] private SettingsMenu settingsMenu;
-        [SerializeField] private Button settingsBackButton;
         private Selectable previouslySelected = null;
         private bool isSettingsOpen = false;
         private Coroutine settingsToggleCoroutine;
@@ -39,8 +38,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             settingsMenuPanel.SetActive(true);
             settingsMenu.Open();
         
-            settingsBackButton.onClick.RemoveAllListeners();
-            settingsBackButton.onClick.AddListener(CloseSettingsMenu);
+            settingsMenu.backButton.onClick.RemoveAllListeners();
+            settingsMenu.backButton.onClick.AddListener(CloseSettingsMenu);
+            
+            selectionIcon.gameObject.SetActive(false);
 
             settingsToggleCoroutine = null;
         }
@@ -72,6 +73,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             SetupNavigation();
 
             settingsToggleCoroutine = null;
+
+            if (isUsingController) selectionIcon.gameObject.SetActive(true);
         }
     }
 }

@@ -98,12 +98,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         }
 
         private void UpdateButtonAppearance(LevelButton button)
-        {
-            if (button.button.image == null) 
-                return;
-            
+        {   
             button.button.image.sprite = GameConstants.Instance.levelIcons[button.level.levelType];
-            
             if (button.button.interactable)
                 button.button.image.color = GameConstants.Instance.levelColors[button.level.levelType];
             else
@@ -141,7 +137,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                             continue;
                             
                         LevelButton toButton = nodeToButtonMap[toNode];
-
                         LineRenderer lineRenderer = Instantiate(lineRendererPrefab, lineParent);
                         
                         lineRenderer.transform.localPosition = Vector3.zero;

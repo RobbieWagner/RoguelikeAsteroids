@@ -169,28 +169,18 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             if (Mathf.Abs(input.y) > Mathf.Abs(input.x))
             {
                 if (input.y > 0.5f)
-                {
                     NavigateVertical(-1);
-                    inputHandled = true;
-                }
                 else if (input.y < -0.5f)
-                {
                     NavigateVertical(1);
-                    inputHandled = true;
-                }
+                inputHandled = true;
             }
             else
             {
                 if (input.x < -0.5f)
-                {
                     NavigateHorizontal(-1);
-                    inputHandled = true;
-                }
                 else if (input.x > 0.5f)
-                {
                     NavigateHorizontal(1);
-                    inputHandled = true;
-                }
+                inputHandled = true;
             }
             
             if (inputHandled)
