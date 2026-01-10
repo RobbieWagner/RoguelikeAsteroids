@@ -3,7 +3,8 @@ using UnityEngine.UI;
 using RobbieWagnerGames.UI;
 using TMPro;
 using RobbieWagnerGames.Utilities.SaveData;
-using System;
+using RobbieWagnerGames.Managers;
+using System.Collections;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -63,13 +64,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void OnRunMenuRequested()
         {
-            Open();
+            activeMenu = this;
             UpdateUI();
         }
 
         private void OnRunMenuHideRequested()
         {
-            Close();
+            activeMenu = null;
         }
 
         private void UpdateUI()
@@ -82,6 +83,32 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             currentCredits += amount;
             UpdateUI();
+        }
+
+        public override void Open()
+        {
+            if (disableGameControlsWhenOpen)
+            {
+                previousActiveMaps.Clear();
+                previousActiveMaps.AddRange(InputManager.Instance.CurrentActiveMaps);
+            }
+
+            StartCoroutine(DelayActionMap());
+            
+            canvas.enabled = true;
+            
+            lastMouseActivityTime = Time.time - mouseInactivityTimeout;
+            
+            SetupNavigation();
+            StartSelectionMaintenance();
+
+            OnOpened();
+        }
+
+        private IEnumerator DelayActionMap()
+        {
+            yield return new WaitForSecondsRealtime(1f);
+            InputManager.Instance.EnableActionMap(ActionMapName.UI);
         }
 
         public bool SpendCredits(int amount)

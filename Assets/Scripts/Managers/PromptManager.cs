@@ -14,8 +14,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private string defaultCancelText = "Cancel";
         [SerializeField] private Color defaultConfirmColor = new Color(0.2f, 0.8f, 0.2f); // Green
         [SerializeField] private Color defaultCancelColor = new Color(0.8f, 0.2f, 0.2f); // Red
-        [SerializeField] private bool defaultPauseGame = true;
-        [SerializeField] private bool defaultCanCloseWithEscape = true;
         
         public void ShowPrompt(PromptData promptData)
         {

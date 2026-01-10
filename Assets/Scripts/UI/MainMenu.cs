@@ -19,12 +19,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             playButton.onClick.AddListener(OnPlayButtonClicked);
             settingsButton.onClick.AddListener(OnSettingsButtonClicked);
             exitButton.onClick.AddListener(OnExitButtonClicked);
-        
+            
             settingsMenuPanel.SetActive(false);
-        
+            
             firstSelected = playButton;
 
             Open();
+            activeMenu = this;
         }
 
         private void OnPlayButtonClicked()

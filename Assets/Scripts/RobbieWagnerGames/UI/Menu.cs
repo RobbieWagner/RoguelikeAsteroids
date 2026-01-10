@@ -10,6 +10,31 @@ namespace RobbieWagnerGames.UI
     [RequireComponent(typeof(Canvas))]
     public class Menu : MonoBehaviour
     {
+        protected static Menu _activeMenu = null;
+        public static Menu activeMenu
+        {
+            get => _activeMenu;
+            set
+            {
+                if (_activeMenu == value) return;
+                
+                if (_activeMenu != null)
+                {
+                    _activeMenu.Close();
+                    _activeMenu.StopInputHandling();
+                }
+                
+                _activeMenu = value;
+                
+                if (_activeMenu != null)
+                {
+                    _activeMenu.StartCoroutine(_activeMenu.RefreshInputHandling());
+                    _activeMenu.Open();
+                    _activeMenu.StartInputHandling();
+                }
+            }
+        }
+
         [Header("Menu Configuration")]
         [SerializeField] protected bool enableOnStart = true;
         [SerializeField] protected bool disableGameControlsWhenOpen = true;
@@ -34,18 +59,21 @@ namespace RobbieWagnerGames.UI
         protected Vector2 lastControllerInput = Vector2.zero;
         protected float lastControllerNavigationTime = 0f;
         protected float lastMouseActivityTime = 0f;
+        protected float lastFrameMousePos;
         protected bool canNavigateWithController = true;
-        protected bool isUsingController = false;
+        protected static bool isUsingController = false;
+        protected bool ignoreNextSubmit = false;
         
         protected List<ActionMapName> previousActiveMaps = new List<ActionMapName>();
         
         protected Coroutine selectionMaintenanceCoroutine;
         protected GameObject forcedSelectionObject;
         
-        public bool IsOpen => canvas != null && canvas.enabled;
+        public virtual bool IsOpen => canvas != null && canvas.enabled;
 
         [SerializeField] protected Image selectionIcon;
         [SerializeField] protected float selectionIconOffset = 15f;
+        [SerializeField] protected bool placeIconOnLeft = true;
         
         protected virtual void Awake()
         {
@@ -63,6 +91,17 @@ namespace RobbieWagnerGames.UI
         {
             InputManager.Instance.onActionMapsUpdated += OnActionMapsUpdated;
             
+            InputAction submitAction = InputManager.Instance.GetAction(ActionMapName.UI, "Submit");
+            InputAction cancelAction = InputManager.Instance.GetAction(ActionMapName.UI, "Cancel");
+            InputAction clickAction = InputManager.Instance.GetAction(ActionMapName.UI, "Click");
+            
+            if (submitAction != null)
+                submitAction.performed += OnSubmitPerformed;
+            if (cancelAction != null)
+                cancelAction.performed += OnCancelPerformed;
+            if (clickAction != null)
+                clickAction.performed += OnClickPerformed;
+            
             RefreshSelectableElements();
             
             if (IsOpen)
@@ -72,6 +111,17 @@ namespace RobbieWagnerGames.UI
         protected virtual void OnDisable()
         {
             InputManager.Instance.onActionMapsUpdated -= OnActionMapsUpdated;
+            
+            InputAction submitAction = InputManager.Instance.GetAction(ActionMapName.UI, "Submit");
+            InputAction cancelAction = InputManager.Instance.GetAction(ActionMapName.UI, "Cancel");
+            InputAction clickAction = InputManager.Instance.GetAction(ActionMapName.UI, "Click");
+            
+            if (submitAction != null)
+                submitAction.performed -= OnSubmitPerformed;
+            if (cancelAction != null)
+                cancelAction.performed -= OnCancelPerformed;
+            if (clickAction != null)
+                clickAction.performed -= OnClickPerformed;
             
             StopSelectionMaintenance();
         }
@@ -84,36 +134,72 @@ namespace RobbieWagnerGames.UI
         
         protected virtual void Update()
         {
-            if (!IsOpen) return;
+            if (!IsOpen || activeMenu != this || !InputManager.Instance.Controls.UI.enabled) return;
             
             HandleInputModeDetection();
             HandleControllerNavigation();
             HandleMouseNavigation();
             CheckForLostSelection();
+            UpdateSelectionIconVisibility();
+        }
+
+        private void OnSubmitPerformed(InputAction.CallbackContext context)
+        {
+            if (!IsOpen || activeMenu != this || !isUsingController) return;
+            
+            if (ignoreNextSubmit)
+            {
+                ignoreNextSubmit = false;
+                return;
+            }
+            
+            float value = context.ReadValue<float>();
+            if (value > 0.5f)
+                HandleSubmit();
+        }
+
+        private void OnCancelPerformed(InputAction.CallbackContext context)
+        {
+            if (!IsOpen || activeMenu != this || !isUsingController) return;
+            
+            float value = context.ReadValue<float>();
+            if (value > 0.5f)
+                HandleCancel();
+        }
+
+        private void OnClickPerformed(InputAction.CallbackContext context)
+        {
+            if (!IsOpen || activeMenu != this || isUsingController) return;
+            
+            float value = context.ReadValue<float>();
+            if (value > 0.5f)
+                HandleMouseClick();
         }
         
-        private void HandleInputModeDetection()
+        protected virtual void HandleInputModeDetection()
         {
             bool controllerInputThisFrame = false;
             
-            var navigateAction = InputManager.Instance.GetAction(ActionMapName.UI, "Navigate");
+            InputAction navigateAction = InputManager.Instance.GetAction(ActionMapName.UI, "Navigate");
             if (navigateAction != null && navigateAction.ReadValue<Vector2>().magnitude > 0.1f)
                 controllerInputThisFrame = true;
             
-            var submitAction = InputManager.Instance.GetAction(ActionMapName.UI, "Submit");
+            InputAction submitAction = InputManager.Instance.GetAction(ActionMapName.UI, "Submit");
             if (submitAction != null && submitAction.WasPressedThisFrame())
                 controllerInputThisFrame = true;
             
             bool mouseInputThisFrame = false;
-            var pointAction = InputManager.Instance.GetAction(ActionMapName.UI, "Point");
+            InputAction pointAction = InputManager.Instance.GetAction(ActionMapName.UI, "Point");
             if (pointAction != null)
             {
-                Vector2 mouseDelta = pointAction.ReadValue<Vector2>();
-                if (mouseDelta.magnitude > 0.1f)
+                Vector2 mousePos = pointAction.ReadValue<Vector2>();
+                float mouseDelta = Mathf.Abs(lastFrameMousePos - mousePos.magnitude);
+                if (mouseDelta > 10f)
                 {
                     mouseInputThisFrame = true;
                     lastMouseActivityTime = Time.time;
                 }
+                lastFrameMousePos = mousePos.magnitude;
             }
             
             if (controllerInputThisFrame)
@@ -121,20 +207,37 @@ namespace RobbieWagnerGames.UI
                 isUsingController = true;
                 ForceControllerMode();
             }
-            else if (mouseInputThisFrame || (Time.time - lastMouseActivityTime < mouseInactivityTimeout && !isUsingController))
-                isUsingController = false;
-            
-            if (isUsingController && !controllerInputThisFrame && Time.time - lastMouseActivityTime < mouseInactivityTimeout)
+            else if (mouseInputThisFrame)
                 isUsingController = false;
         }
-        
-        private void ForceControllerMode()
+
+        private void UpdateSelectionIconVisibility()
+        {
+            if (selectionIcon != null)
+            {
+                bool shouldShowIcon = isUsingController;
+                selectionIcon.gameObject.SetActive(shouldShowIcon);
+                
+                if (shouldShowIcon)
+                {
+                    GameObject selected = EventSystemManager.Instance.CurrentSelected;
+                    if (selected != null)
+                    {
+                        Selectable selectable = selected.GetComponent<Selectable>();
+                        if (selectable != null)
+                            UpdateSelectionIcon(selectable);
+                    }
+                }
+            }
+        }
+
+        protected virtual void ForceControllerMode()
         {
             if (!EventSystemManager.Instance.HasSelection())
                 RestoreOrSetDefaultSelection();
         }
         
-        private void CheckForLostSelection()
+        protected virtual void CheckForLostSelection()
         {
             if (!IsOpen || !maintainSelectionAlways || !isUsingController) return;
             
@@ -193,8 +296,7 @@ namespace RobbieWagnerGames.UI
             InputManager.Instance.EnableActionMap(ActionMapName.UI);
             
             canvas.enabled = true;
-            
-            isUsingController = false;
+
             lastMouseActivityTime = Time.time - mouseInactivityTimeout;
             
             SetupNavigation();
@@ -202,7 +304,7 @@ namespace RobbieWagnerGames.UI
 
             OnOpened();
         }
-        
+
         public virtual void Close()
         {
             if (canvas == null) 
@@ -214,7 +316,7 @@ namespace RobbieWagnerGames.UI
             if (restorePreviousActionMapsOnClose && disableGameControlsWhenOpen)
             {
                 InputManager.Instance.DisableAllActionMaps();
-                foreach (var map in previousActiveMaps)
+                foreach (ActionMapName map in previousActiveMaps)
                     InputManager.Instance.EnableActionMap(map, false);
                 previousActiveMaps.Clear();
             }
@@ -224,6 +326,18 @@ namespace RobbieWagnerGames.UI
             EventSystemManager.Instance.SetSelected(null);
             
             OnClosed();
+        }
+
+        protected void StartInputHandling()
+        {
+            if (isUsingController)
+                SetupNavigation();
+        }
+
+        protected void StopInputHandling()
+        {
+            EventSystemManager.Instance.ClearSelection();
+            forcedSelectionObject = null;
         }
         
         public virtual void Toggle()
@@ -257,7 +371,6 @@ namespace RobbieWagnerGames.UI
         {
             RefreshSelectableElements();
             
-            isUsingController = true;
             lastMouseActivityTime = Time.time - mouseInactivityTimeout;
             
             Selectable elementToSelect = firstSelected;
@@ -281,7 +394,7 @@ namespace RobbieWagnerGames.UI
             }
         }
         
-        private void StartSelectionMaintenance()
+        protected void StartSelectionMaintenance()
         {
             StopSelectionMaintenance();
             selectionMaintenanceCoroutine = StartCoroutine(SelectionMaintenanceRoutine());
@@ -310,7 +423,7 @@ namespace RobbieWagnerGames.UI
             }
         }
         
-        private void RestoreOrSetDefaultSelection()
+        protected void RestoreOrSetDefaultSelection()
         {
             if (!IsOpen || selectableElements.Count == 0) return;
             
@@ -326,7 +439,7 @@ namespace RobbieWagnerGames.UI
                 selectionToRestore = selectableElements[currentSelectedIndex].gameObject;
             else
             {
-                foreach (var element in selectableElements)
+                foreach (Selectable element in selectableElements)
                 {
                     if (element.interactable && element.gameObject.activeInHierarchy)
                     {
@@ -352,7 +465,7 @@ namespace RobbieWagnerGames.UI
             if (element == EventSystemManager.Instance.CurrentSelected)
                 yield break;
 
-            yield return new WaitForSecondsRealtime(.01f);
+            yield return new WaitForSecondsRealtime(.1f);
             
             EventSystemManager.Instance.SetSelected(element.gameObject);
             forcedSelectionObject = element.gameObject;
@@ -403,15 +516,19 @@ namespace RobbieWagnerGames.UI
         
         protected virtual void NavigateVertical(int direction)
         {
+            // If this is a SettingsMenu, skip base navigation logic
+            if (this is SettingsMenu) // Placeholder logic to prevent call in settings menu due to bug
+                return;
+
             if (selectableElements.Count == 0) return;
-            
+
             int newIndex = currentSelectedIndex;
             int attempts = 0;
-            
+
             do
             {
                 newIndex += direction;
-                
+
                 if (wrapNavigation)
                 {
                     if (newIndex < 0) newIndex = selectableElements.Count - 1;
@@ -419,17 +536,17 @@ namespace RobbieWagnerGames.UI
                 }
                 else
                     newIndex = Mathf.Clamp(newIndex, 0, selectableElements.Count - 1);
-                
+
                 attempts++;
-                
+
                 if (attempts > selectableElements.Count)
                 {
                     Debug.LogWarning("Failed to find valid element to navigate to", this);
                     return;
                 }
-                
+
             } while (!selectableElements[newIndex].interactable || !selectableElements[newIndex].gameObject.activeInHierarchy);
-            
+
             currentSelectedIndex = newIndex;
             ForceSelectElement(selectableElements[currentSelectedIndex]);
         }
@@ -438,7 +555,7 @@ namespace RobbieWagnerGames.UI
         {
             if (currentSelectedIndex < 0 || currentSelectedIndex >= selectableElements.Count) return;
             
-            var currentElement = selectableElements[currentSelectedIndex];
+            Selectable currentElement = selectableElements[currentSelectedIndex];
             
             if (currentElement is Slider slider)
             {
@@ -498,7 +615,7 @@ namespace RobbieWagnerGames.UI
         {
             if (currentSelectedIndex < 0 || currentSelectedIndex >= selectableElements.Count) return;
             
-            var currentElement = selectableElements[currentSelectedIndex];
+            Selectable currentElement = selectableElements[currentSelectedIndex];
             
             if (currentElement is Button button)
                 button.onClick?.Invoke();
@@ -513,7 +630,6 @@ namespace RobbieWagnerGames.UI
         
         protected virtual void HandleCancel()
         {
-            Close();
             OnCancelPressed();
         }
         
@@ -525,6 +641,16 @@ namespace RobbieWagnerGames.UI
         protected void ResetControllerNavigation()
         {
             canNavigateWithController = true;
+        }
+   
+
+        private IEnumerator RefreshInputHandling()
+        {
+            ignoreNextSubmit = true;
+            
+            InputManager.Instance.DisableActionMap(ActionMapName.UI);
+            yield return new WaitForSecondsRealtime(.3f);
+            InputManager.Instance.EnableActionMap(ActionMapName.UI);
         }
         
         private void OnApplicationFocusChanged(bool hasFocus)
@@ -558,37 +684,57 @@ namespace RobbieWagnerGames.UI
         protected virtual void OnClosed() { }
         protected virtual void OnElementSelected(Selectable element)
         {
-            // Place the selection icon to the left of the selected obj if using controller
-            if(element != null && selectionIcon != null && isUsingController)
+            UpdateSelectionIcon(element);
+        }
+
+        private void UpdateSelectionIcon(Selectable element)
+        {
+            if (element != null && selectionIcon != null && isUsingController)
             {
                 selectionIcon.gameObject.SetActive(true);
-                
+
                 RectTransform elementRect = element.GetComponent<RectTransform>();
-                Vector3 elementPosition = elementRect.position;
                 RectTransform iconRect = selectionIcon.GetComponent<RectTransform>();
-                
+
                 iconRect.SetParent(elementRect.parent);
-                    iconRect.SetAsLastSibling();
-                
+                iconRect.SetAsLastSibling();
+
                 Vector3[] elementCorners = new Vector3[4];
                 elementRect.GetWorldCorners(elementCorners);
 
-                Vector3 leftCenter = new Vector3(
-                    elementCorners[0].x, // left x
-                    (elementCorners[0].y + elementCorners[1].y) * 0.5f, // center y between bottom-left and top-left
-                    elementCorners[0].z
-                );
+                Vector3 targetPosition;
+                
+                if (placeIconOnLeft)
+                {
+                    targetPosition = new Vector3(
+                        elementCorners[0].x,
+                        (elementCorners[0].y + elementCorners[1].y) * 0.5f, 
+                        elementCorners[0].z
+                    );
+                }
+                else
+                {
+                    targetPosition = new Vector3(
+                        elementCorners[3].x,
+                        (elementCorners[2].y + elementCorners[3].y) * 0.5f,
+                        elementCorners[3].z
+                    );
+                }
 
-                Vector3 localPos = iconRect.parent.InverseTransformPoint(leftCenter);
+                Vector3 localPos = iconRect.parent.InverseTransformPoint(targetPosition);
                 float iconWidth = iconRect.rect.width * iconRect.localScale.x;
-                localPos.x -= iconWidth * 0.5f + selectionIconOffset;
+                
+                if (placeIconOnLeft)
+                    localPos.x -= iconWidth * 0.5f + selectionIconOffset;
+                else
+                    localPos.x += iconWidth * 0.5f + selectionIconOffset;
+                
                 iconRect.localPosition = localPos;
-                
                 iconRect.localScale = Vector3.one;
-                
                 selectionIcon.transform.SetAsLastSibling();
             }
         }
+
         protected virtual void OnElementSubmitted(Selectable element) { }
         protected virtual void OnCancelPressed() { }
         protected virtual void OnMouseClicked() { }

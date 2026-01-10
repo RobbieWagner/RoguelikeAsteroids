@@ -124,7 +124,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 cancelButton.navigation = cancelNav;
             }
             
-            isUsingController = true;
             lastMouseActivityTime = Time.time - mouseInactivityTimeout;
         }
         

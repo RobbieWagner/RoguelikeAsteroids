@@ -61,16 +61,6 @@ namespace RobbieWagnerGames.UI
             InputManager.Instance.Controls.UI.NavigateTabs.performed -= OnNavigateTabsPerformed;
         }
 
-        protected override void Update()
-        {
-            if (!IsOpen) return;
-            
-            HandleInputModeDetection();
-            HandleControllerNavigation();
-            HandleMouseNavigation();
-            CheckForLostSelection();
-        }
-
         protected override void ForceControllerMode()
         {
             if (!EventSystemManager.Instance.HasSelection())
@@ -281,11 +271,11 @@ namespace RobbieWagnerGames.UI
             float hazardVolume = Mathf.Lerp(-80f, 0f, hazardVolumeSlider.value);
             float playerVolume = Mathf.Lerp(-80f, 0f, playerVolumeSlider.value);
             
-            audioMixer.SetFloat("MasterVolume", masterVolume);
-            audioMixer.SetFloat("MusicVolume", musicVolume);
-            audioMixer.SetFloat("UIVolume", uiVolume);
-            audioMixer.SetFloat("HazardVolume", hazardVolume);
-            audioMixer.SetFloat("PlayerVolume", playerVolume);
+            audioMixer.SetFloat("main", masterVolume);
+            audioMixer.SetFloat("music", musicVolume);
+            audioMixer.SetFloat("ui", uiVolume);
+            audioMixer.SetFloat("hazard", hazardVolume);
+            audioMixer.SetFloat("player", playerVolume);
         }
 
         private void SaveSettings()

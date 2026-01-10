@@ -16,7 +16,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private float mousePointerPos = 0;
         [SerializeField] private float controllerNavigationDelay = 0.2f;
         [SerializeField] private float controllerRepeatRate = 0.1f;
-        [SerializeField] private float mouseInactivityTimeout = 2f;
         
         [SerializeField] private bool maintainSelectionAlways = true;
         [SerializeField] private float selectionCheckInterval = 0.5f;
@@ -26,8 +25,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private List<LevelButton> pastButtons = new List<LevelButton>(), presentButtons = new List<LevelButton>(), futureButtons = new List<LevelButton>();
         private Vector2 lastControllerInput = Vector2.zero;
         private float lastControllerNavigationTime = 0f;
-        private bool canNavigateWithController, isUsingController = false;
-        
+        private bool canNavigateWithController = false;
+        private static bool isUsingController = false;
+
         private GameObject forcedSelectionObject;
         private Coroutine selectionMaintenanceCoroutine;
 
@@ -422,7 +422,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             yield return new WaitForSecondsRealtime(.01f);
             
-            isUsingController = true;
             RestoreOrSetDefaultSelection();
         }
         

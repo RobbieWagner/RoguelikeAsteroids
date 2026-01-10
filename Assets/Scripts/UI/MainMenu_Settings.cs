@@ -36,8 +36,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             exitButton.gameObject.SetActive(false);
             
             settingsMenuPanel.SetActive(true);
-            settingsMenu.Open();
-        
+            
+            // Set settings menu as active
+            activeMenu = settingsMenu;
+            
             settingsMenu.backButton.onClick.RemoveAllListeners();
             settingsMenu.backButton.onClick.AddListener(CloseSettingsMenu);
             
@@ -57,16 +59,15 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private IEnumerator CloseSettingsMenuCoroutine()
         {
             yield return null;
-
             isSettingsOpen = false;
-
             settingsMenuPanel.SetActive(false);
-
             settingsMenu.Close();
             
             playButton.gameObject.SetActive(true);
             settingsButton.gameObject.SetActive(true);
             exitButton.gameObject.SetActive(true);
+            
+            activeMenu = this;
             
             firstSelected = previouslySelected != null ? previouslySelected : playButton;
             RefreshSelectableElements();

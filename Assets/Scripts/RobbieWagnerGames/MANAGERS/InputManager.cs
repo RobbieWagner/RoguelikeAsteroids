@@ -93,7 +93,7 @@ namespace RobbieWagnerGames.Managers
                 currentActiveMaps.Add(mapName);
             }
             else
-                Debug.LogWarning($"Could not enable action map {mapName}: not found", this);
+                Debug.LogWarning($"Could not enable action map {mapName}: not found or is already enabled", this);
 
             onActionMapsUpdated?.Invoke(currentActiveMaps);
         }
@@ -153,11 +153,12 @@ namespace RobbieWagnerGames.Managers
         /// <summary>
         /// Restores the action maps saved in reservedMaps and clears the reservedMaps list.
         /// </summary>
-        public void RestoreReservedActionMaps()
+        public void RestoreReservedActionMaps(List<ActionMapName> skippedMaps = null)
         {
             foreach (var map in reservedMaps)
             {
-                EnableActionMap(map, false); // Don't disable others, just enable each
+                if(!skippedMaps.Any() || !skippedMaps.Contains(map))
+                    EnableActionMap(map, false); // Don't disable others, just enable each
             }
             reservedMaps.Clear();
         }

@@ -28,9 +28,10 @@ namespace RobbieWagnerGames.UI
 
         private IEnumerator OpenSettingsMenuCoroutine()
         {
-            yield return new WaitForSecondsRealtime(.02f);
+            yield return null;
 
             isSettingsOpen = true;
+
             previouslySelected = EventSystemManager.Instance?.CurrentSelected?.GetComponent<Selectable>();
 
             resumeButton.gameObject.SetActive(false);
@@ -38,10 +39,14 @@ namespace RobbieWagnerGames.UI
             mainMenuButton.gameObject.SetActive(false);
             
             settingsMenuPanel.SetActive(true);
- 
-            settingsMenu.Open();
-        
-            settingsMenu.RefreshSelectableElements();
+            
+            // Set settings menu as active
+            activeMenu = settingsMenu;
+            
+            settingsMenu.backButton.onClick.RemoveAllListeners();
+            settingsMenu.backButton.onClick.AddListener(CloseSettingsMenu);
+            
+            selectionIcon.gameObject.SetActive(false);
 
             settingsToggleCoroutine = null;
         }
@@ -57,11 +62,9 @@ namespace RobbieWagnerGames.UI
         private IEnumerator CloseSettingsMenuCoroutine()
         {
             yield return null;
-
             isSettingsOpen = false;
-
-            if (settingsMenu != null)
-                settingsMenu.Close();
+            settingsMenuPanel.SetActive(false);
+            settingsMenu.Close();
             
             settingsMenuPanel.SetActive(false);
             
@@ -69,11 +72,15 @@ namespace RobbieWagnerGames.UI
             settingsButton.gameObject.SetActive(true);
             mainMenuButton.gameObject.SetActive(true);
             
+            activeMenu = this;
+            
             firstSelected = previouslySelected != null ? previouslySelected : resumeButton;
             RefreshSelectableElements();
             SetupNavigation();
 
             settingsToggleCoroutine = null;
+
+            if (isUsingController) selectionIcon.gameObject.SetActive(true);
         }
     }
 }

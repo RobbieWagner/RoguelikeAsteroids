@@ -18,8 +18,10 @@ namespace RobbieWagnerGames.UI
         [SerializeField] private Button mainMenuButton;
         
         [SerializeField] private bool pauseTime = true;
+        public override bool IsOpen => base.IsOpen && !isSettingsOpen;
         
         private bool isPaused = false;
+        private Menu previouslyOpenMenu = null;
 
         protected override void Awake()
         {
@@ -98,21 +100,23 @@ namespace RobbieWagnerGames.UI
             InputManager.Instance.SaveAndDisableCurrentActionMaps();
             InputManager.Instance.EnableActionMap(ActionMapName.UI);
             
-            Open();
+            previouslyOpenMenu = activeMenu;
+            activeMenu = this;
         }
-        
+
         public void ResumeGame()
         {
             if (!isPaused) return;
 
             isPaused = false;
             
-            Close();
+           activeMenu = previouslyOpenMenu;
+           previouslyOpenMenu = null;
             
             if (pauseTime)
                 Time.timeScale = 1f;
             
-            InputManager.Instance.RestoreReservedActionMaps();
+            InputManager.Instance.RestoreReservedActionMaps(new () {ActionMapName.UI});
             EventSystemManager.Instance.ClearSelection();
         }
         
