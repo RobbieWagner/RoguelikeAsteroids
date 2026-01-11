@@ -72,7 +72,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             }
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             OnShootableDestroyed?.Invoke(this, destructionReason);
         }

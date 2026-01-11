@@ -1,11 +1,12 @@
 using RobbieWagnerGames.Audio;
-using RobbieWagnerGames.RoguelikeAsteroids;
 using UnityEngine;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
     public class Asteroid : Shootable
     {
+        [SerializeField] private bool generateResources = true;
+
         protected override void OnShootableDestroyedFromShot()
         {
             BasicAudioManager.Instance.Play(AudioSourceName.AsteroidDestroyed);
@@ -15,12 +16,14 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected override void GenerateRandomResources()
         {
             resourceData = new ResourceGatherData();
+
+            if (!generateResources) return;
             
-            int totalResources = UnityEngine.Random.Range(3, 8);
+            int totalResources = Random.Range(3, 8);
             
             for (int i = 0; i < totalResources; i++)
             {
-                float roll = UnityEngine.Random.value;
+                float roll = Random.value;
                 if (roll < 0.6f)
                     resourceData.AddResource(ResourceType.TITANIUM, 1);
                 else if (roll < 0.9f)

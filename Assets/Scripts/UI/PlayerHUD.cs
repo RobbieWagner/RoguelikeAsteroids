@@ -251,7 +251,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void UpdateHealthUI(int health)
         {
-            Debug.Log(health);
             foreach(Image sprite in healthSprites)
             {
                 if(sprite != null)

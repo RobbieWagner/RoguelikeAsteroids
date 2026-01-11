@@ -12,7 +12,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private AsteroidsLevelController levelController;
 
         [Header("Asteroid Spawning")]
-        [SerializeField] private Asteroid asteroidPrefab;
+        [SerializeField] private List<Asteroid> asteroidPrefabs;
         [SerializeField] private int maxAsteroids = 10;
         [SerializeField] private float spawnRadius;
         [SerializeField] private float boundsRadius;
@@ -98,18 +98,24 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void SpawnAsteroid()
         {
-            Asteroid asteroid = Instantiate(asteroidPrefab, transform);
-            
             Vector2 pos = UnityEngine.Random.insideUnitCircle.normalized * spawnRadius;
-            asteroid.transform.position = pos;
             Vector2 targetPos = UnityEngine.Random.insideUnitCircle.normalized * targetRadius;
             Vector2 direction = (targetPos - pos).normalized;
+            float speed = UnityEngine.Random.Range(speedRange.x, speedRange.y);
 
-            asteroid.Initialize(
-                UnityEngine.Random.Range(speedRange.x, speedRange.y), 
-                direction, 
-                boundsRadius
-            );
+            Asteroid prefabToSpawn = asteroidPrefabs[UnityEngine.Random.Range(0, asteroidPrefabs.Count)];
+            
+            SpawnAsteroid(prefabToSpawn, speed, direction,pos);
+        }
+
+        public void SpawnAsteroid(Asteroid asteroidPrefab, float speed, Vector2 direction, Vector2 pos, float radius = -1)
+        {
+            float bounds = radius > 0 ? radius : boundsRadius;
+            
+            Asteroid asteroid = Instantiate(asteroidPrefab, transform);
+            asteroid.transform.position = pos;
+            
+            asteroid.Initialize(speed, direction, bounds);
             
             asteroid.OnShootableDestroyed += HandleShootableDestroyed;
             spawnedShootables.Add(asteroid);

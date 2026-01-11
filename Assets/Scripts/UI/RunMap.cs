@@ -22,6 +22,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private float tierDisplayDistance;
         [SerializeField] private float sideBuffer;
         [SerializeField] private Vector2 baseNodePlacement;
+        [SerializeField] private Vector2 nodeWorldPositionOffset;
 
         private void DisplayRunUI(Run run)
         {
@@ -86,6 +87,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                     
                     LevelButton button = Instantiate(levelButtonPrefab, nodeParent);
                     button.transform.localPosition = new Vector3(nodeXPos, nodeYPos, 0);
+                    Vector2 positionOffset = Random.insideUnitCircle/4.25f;
+                    button.transform.localPosition += (Vector3) positionOffset;
                     button.level = nodes[j].level;
                     button.levelNode = nodes[j];
 
@@ -256,8 +259,24 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void SetCanvasTransform(Run run)
         {
-            Vector2 canvasPos = Vector2.down * tierDisplayDistance * (run.currentNode != null ? run.currentNode.tier : 0) * 2;
-            canvasGroup.transform.position = canvasPos; 
+            LevelButton currentNodeButton = null;
+            if (run.currentNode != null)
+                currentNodeButton = levelButtonInstances.FirstOrDefault(b => b.levelNode.Equals(run.currentNode));
+            
+            if (currentNodeButton != null)
+            {
+                Vector3 nodeWorldPosition = currentNodeButton.transform.position;
+                canvasGroup.transform.position = -nodeWorldPosition;
+            }
+            else if (run.currentNode == null && levelButtonInstances.Count > 0)
+            {
+                LevelButton firstTier0Button = levelButtonInstances.FirstOrDefault(b => b.levelNode.tier == 0);
+                if (firstTier0Button != null)
+                {
+                    Vector3 nodeWorldPosition = firstTier0Button.transform.position;
+                    canvasGroup.transform.position = -nodeWorldPosition + (Vector3) nodeWorldPositionOffset;
+                }
+            }
         }
     }
 }

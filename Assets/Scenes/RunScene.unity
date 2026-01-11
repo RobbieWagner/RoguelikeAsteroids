@@ -626,8 +626,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -2.4999993}
+  m_SizeDelta: {x: 2, y: 5.000002}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &486904984
 MonoBehaviour:
@@ -800,6 +800,7 @@ MonoBehaviour:
   restoreSelectionOnWindowFocus: 1
   selectionIcon: {fileID: 459744047}
   selectionIconOffset: 15
+  placeIconOnLeft: 1
   newRunButton: {fileID: 1072475756}
   continueButton: {fileID: 325569949}
   mainMenuButton: {fileID: 787836638}
@@ -2513,6 +2514,7 @@ MonoBehaviour:
   restoreSelectionOnWindowFocus: 1
   selectionIcon: {fileID: 2134640580}
   selectionIconOffset: 15
+  placeIconOnLeft: 1
   <retryButton>k__BackingField: {fileID: 1853780996}
   <mainMenuButton>k__BackingField: {fileID: 899266196}
   resourceUIParent: {fileID: 1806040568}
@@ -3382,13 +3384,13 @@ MonoBehaviour:
   lineParent: {fileID: 708758574}
   tierDisplayDistance: 1
   sideBuffer: 3.5
-  baseNodePlacement: {x: 0, y: 1}
+  baseNodePlacement: {x: 0, y: 0.5}
+  nodeWorldPositionOffset: {x: 0, y: -4}
   selectionIndicator: {fileID: 982277079}
   selectionIndicatorOffset: 0.1
   navigationDeadzone: 0.1
   controllerNavigationDelay: 0.2
   controllerRepeatRate: 0.1
-  mouseInactivityTimeout: 2
   maintainSelectionAlways: 1
   selectionCheckInterval: 0.5
   restoreSelectionOnWindowFocus: 1

@@ -1758,7 +1758,7 @@ GameObject:
   - component: {fileID: 1159448624}
   - component: {fileID: 1159448625}
   m_Layer: 0
-  m_Name: AsteroidManager
+  m_Name: ShootableManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1792,7 +1792,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelController: {fileID: 824147135}
-  asteroidPrefab: {fileID: 3117594188209707119, guid: 79636a3ba875c434a906d243bf228c54, type: 3}
+  asteroidPrefabs:
+  - {fileID: 3117594188209707119, guid: 79636a3ba875c434a906d243bf228c54, type: 3}
+  - {fileID: 3901439355351499075, guid: 3fc6f6d7ac77fe5428e30d5558e90d24, type: 3}
   maxAsteroids: 10
   spawnRadius: 9
   boundsRadius: 10
