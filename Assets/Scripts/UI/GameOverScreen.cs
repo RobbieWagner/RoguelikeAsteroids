@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using TMPro;
 using DG.Tweening;
 using RobbieWagnerGames.UI;
+using System;
+using System.Collections;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
     public class GameOverScreen : Menu
     {
         [Header("Game Over UI")]
+        [SerializeField] private CanvasGroup canvasGroup;
         [field: SerializeField] public Button retryButton { get; private set; }
         [field: SerializeField] public Button mainMenuButton { get; private set; }
         
@@ -55,6 +58,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             Open();
             gameOverTitle.text = gameOverTitleText;
             DisplayFinalResources();
+            Tween fadeTween = canvasGroup.DOFade(1f, 1)
+            .SetEase(Ease.OutQuad)
+            .SetUpdate(true) 
+            .OnComplete(() => {
+                canvasGroup.blocksRaycasts = true;
+                canvasGroup.interactable = true;
+            });
         }
 
         private void DisplayFinalResources()

@@ -11,9 +11,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         protected override void OnDestroy()
         {
-			for (int i = 0; i < chunksToSpawn; i++)
-				ShootableManager.Instance.SpawnAsteroid(asteroidChunkPrefab, Random.Range(chunkSpeedRange.x, chunkSpeedRange.y), Random.insideUnitCircle, transform.position, bounds);
-
+			if(doDestructionEffects)
+			{
+				for (int i = 0; i < chunksToSpawn; i++)
+					ShootableManager.Instance.SpawnAsteroid(asteroidChunkPrefab, Random.Range(chunkSpeedRange.x, chunkSpeedRange.y), Random.insideUnitCircle, transform.position, bounds);
+			}
+			
             base.OnDestroy();
         }
 	}

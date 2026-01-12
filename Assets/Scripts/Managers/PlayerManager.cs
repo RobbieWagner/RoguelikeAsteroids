@@ -14,7 +14,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		
 		public void PlayerHit()
 		{
-			Debug.Log("pm");
 			OnPlayerHit?.Invoke(currentPlayer);
 		}
 	}

@@ -2457,6 +2457,7 @@ GameObject:
   - component: {fileID: 1560418621}
   - component: {fileID: 1560418620}
   - component: {fileID: 1560418624}
+  - component: {fileID: 1560418625}
   m_Layer: 0
   m_Name: GameOverScreen
   m_TagString: Untagged
@@ -2515,6 +2516,7 @@ MonoBehaviour:
   selectionIcon: {fileID: 2134640580}
   selectionIconOffset: 15
   placeIconOnLeft: 1
+  canvasGroup: {fileID: 1560418625}
   <retryButton>k__BackingField: {fileID: 1853780996}
   <mainMenuButton>k__BackingField: {fileID: 899266196}
   resourceUIParent: {fileID: 1806040568}
@@ -2612,6 +2614,18 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!225 &1560418625
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1560418618}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &1654014956
 GameObject:
   m_ObjectHideFlags: 0

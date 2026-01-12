@@ -375,6 +375,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void StartSelectionMaintenance()
         {
+            InputManager.Instance.EnableActionMap(ActionMapName.UI);
             StopSelectionMaintenance();
             selectionMaintenanceCoroutine = StartCoroutine(SelectionMaintenanceRoutine());
         }

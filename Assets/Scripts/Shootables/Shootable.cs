@@ -24,6 +24,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private Collider2D shootableCollider;
         public ResourceGatherData resourceData = new ResourceGatherData();
         public int durability = 1;
+        [HideInInspector] public bool doDestructionEffects = true;
 
         protected virtual void Awake() {
             GenerateRandomResources();
@@ -59,6 +60,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             boundsRadius = newBoundsRadius;
 
             rb2d.linearVelocity = currentSpeed * currentDirection;
+            rb2d.angularVelocity = UnityEngine.Random.Range(15, 45);
         }
 
         private void Update() 

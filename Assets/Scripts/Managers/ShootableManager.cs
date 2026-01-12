@@ -57,9 +57,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         public void ConfigureForLevel(Level level)
         {
-            maxAsteroids = level.asteroidCount;
-            spawnCooldown = level.asteroidSpawnRate;
-            speedRange = level.asteroidSpeedRange;
+            maxAsteroids = (int) (10 * level.difficultyMultiplier);
+
+            spawnCooldown = 1.5f/level.difficultyMultiplier;
+            
+            speedRange = new Vector2(level.difficultyMultiplier, level.difficultyMultiplier + 2);
         }
 
         public void StartAsteroidSpawner()
@@ -138,6 +140,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 if(shootable != null)
                 {
                     shootable.OnShootableDestroyed -= HandleShootableDestroyed;
+                    shootable.doDestructionEffects = false;
                     Destroy(shootable.gameObject);
                     spawnedShootables.Remove(shootable);
                 }
@@ -157,6 +160,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 if(shootable != null)
                 {
                     shootable.OnShootableDestroyed -= HandleShootableDestroyed;
+                    shootable.doDestructionEffects = false;
                     Destroy(shootable.gameObject);
                 }
             }

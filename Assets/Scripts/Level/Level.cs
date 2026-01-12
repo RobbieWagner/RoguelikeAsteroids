@@ -30,11 +30,5 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public int requiredResources = 50; // Set to -1 if not a requirement
         public bool requiresResources => requiredResources > 0;
         #endregion
-
-        #region shootable spawns
-        public int asteroidCount = 10;
-        public float asteroidSpawnRate = 2f;
-        [JsonIgnore] public Vector2 asteroidSpeedRange = new Vector2(1f, 3f);
-        #endregion
     }
 }

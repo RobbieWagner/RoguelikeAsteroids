@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using DG.Tweening;
 using RobbieWagnerGames.Managers;
 using UnityEngine;
 
@@ -13,6 +15,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public event Action OnLevelFailed;
         public event Action OnLevelCompleted;
 
+        public Sequence screenShakeSequence;
+
         protected virtual void Awake()
         {
             RunManager.Instance.OnStartLevel += StartLevel;
@@ -21,11 +25,22 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void OnPlayerHit(Player player)
         {
-            Debug.Log("hello");
             RunManager.Instance.CurrentRun.health--;
             if (RunManager.Instance.CurrentRun.health == 0)
                 OnPlayerDied();
+            else
+            {
+                player.DisableColliderTemporarily(2f);
+                ShakeScreen();
+            }
             
+        }
+
+        protected virtual void ShakeScreen()
+        {
+            screenShakeSequence?.Kill();
+            screenShakeSequence = DOTween.Sequence();
+            screenShakeSequence.Append(Camera.main.DOShakePosition(1, Vector3.right/2));
         }
 
         protected virtual void Update()
@@ -53,6 +68,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected virtual void FailLevel()
         {
             OnLevelFailed?.Invoke();
+            InputManager.Instance.DisableActionMap(ActionMapName.GAME);
+            StartCoroutine(FailLevelCo());
+        }
+
+        protected virtual IEnumerator FailLevelCo()
+        {
+            yield return new WaitForSeconds(1f);
             RunManager.Instance.FailRun();
         }
 

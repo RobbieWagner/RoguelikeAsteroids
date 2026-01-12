@@ -1,3 +1,4 @@
+using System.Collections;
 using RobbieWagnerGames.Audio;
 using UnityEngine;
 
@@ -6,6 +7,18 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     public class Asteroid : Shootable
     {
         [SerializeField] private bool generateResources = true;
+        [SerializeField] private Collider2D coll;
+        [SerializeField] private float colliderEnableDelay = 0f;
+
+        protected override void Awake()
+        {
+            if (colliderEnableDelay > 0)
+            {
+                coll.enabled = false;
+                StartCoroutine(DelayEnable());
+            }
+            base.Awake();
+        }
 
         protected override void OnShootableDestroyedFromShot()
         {
@@ -31,6 +44,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 else
                     resourceData.AddResource(ResourceType.IRIDIUM, 1);
             }
+        }
+
+        private IEnumerator DelayEnable()
+        {
+            yield return new WaitForSeconds(colliderEnableDelay);
+            coll.enabled = true;
         }
     }
 }

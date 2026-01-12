@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using RobbieWagnerGames.Managers;
 using RobbieWagnerGames.Utilities;
 using UnityEngine;
@@ -14,6 +15,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private Vector2 movementInput = Vector2.zero;
         [SerializeField] private float speed = 5;
         [SerializeField] private Rigidbody2D rb2d;
+        [SerializeField] private Collider2D coll;
         
         [Header("Movement Smoothing")]
         [SerializeField] private float acceleration = 10f;
@@ -34,6 +36,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private AudioSource fireSound;
 
         [SerializeField] private Vector2 movementBounds;
+
+        private Coroutine disableCollCo = null;
 
         protected override void Awake()
         {
@@ -60,7 +64,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             UpdateShooter();
         }
 
-        private void OnTriggerEnter2D(Collider2D other)
+        private void OnTriggerStay2D(Collider2D other)
         {
             if(other.gameObject.CompareTag("asteroid"))
             {
@@ -72,7 +76,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void OnPlayerHit()
         {
-            Debug.Log("player hit");
             PlayerManager.Instance.PlayerHit();
         }
 
@@ -209,6 +212,20 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 gameControls.MousePosition.performed -= OnMouseDelta;
                 gameControls.Shoot.performed -= OnShoot;
             }
+        }
+
+        public void DisableColliderTemporarily(float duration)
+        {
+            if (disableCollCo == null)
+                disableCollCo = StartCoroutine(DisableColliderTemporarilyCo(duration));
+        }
+
+        private IEnumerator DisableColliderTemporarilyCo(float duration)
+        {
+            coll.enabled = false;
+            yield return new WaitForSeconds(duration);
+            coll.enabled = true;
+            disableCollCo = null;
         }
     }
 }

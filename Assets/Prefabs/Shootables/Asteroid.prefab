@@ -169,5 +169,7 @@ MonoBehaviour:
   rb2d: {fileID: 6378324754561335559}
   boundsRadius: 0
   shootableCollider: {fileID: 2192587147288624190}
-  scoreValue: 1
   durability: 1
+  generateResources: 1
+  coll: {fileID: 2192587147288624190}
+  colliderEnableDelay: 0

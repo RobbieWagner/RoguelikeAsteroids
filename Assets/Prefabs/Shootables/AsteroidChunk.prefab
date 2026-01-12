@@ -105,8 +105,10 @@ MonoBehaviour:
   rb2d: {fileID: 5284299000446031983}
   boundsRadius: 0
   shootableCollider: {fileID: 8416668629706301235}
-  durability: 3
+  durability: 1
   generateResources: 0
+  coll: {fileID: 8416668629706301235}
+  colliderEnableDelay: 0.5
 --- !u!58 &8416668629706301235
 CircleCollider2D:
   m_ObjectHideFlags: 0

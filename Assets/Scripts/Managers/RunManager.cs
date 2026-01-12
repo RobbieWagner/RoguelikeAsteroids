@@ -60,9 +60,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             OnNewRunStarted?.Invoke(currentRun);
         }
 
-        private float CalculateLevelDifficulty(int levelIndex, float baseDifficulty)
+        private float CalculateLevelDifficulty(int tier, float baseDifficulty)
         {
-            return baseDifficulty * (1 + (levelIndex * 0.1f));
+            return baseDifficulty * (1 + (tier * 0.1f));
         }
 
         private SerializedDictionary<ResourceType, int> CalculateStartingResources()
@@ -165,9 +165,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if (currentRun == null) return;
 
-            StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"},true));
+            StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"},true, ()=> OnRunFailed?.Invoke(currentRun)));
             
-            OnRunFailed?.Invoke(currentRun);
             EndRun(false);
         }
 

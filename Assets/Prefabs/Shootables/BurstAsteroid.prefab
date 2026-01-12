@@ -107,9 +107,11 @@ MonoBehaviour:
   shootableCollider: {fileID: 1349397553114303341}
   durability: 1
   generateResources: 1
+  coll: {fileID: 1349397553114303341}
+  colliderEnableDelay: 0
   asteroidChunkPrefab: {fileID: 6241097404871085361, guid: 48c1cc60c9b3e9c408fdeea151202170, type: 3}
   chunksToSpawn: 3
-  chunkSpeedRange: {x: 1, y: 2}
+  chunkSpeedRange: {x: 2, y: 3}
   bounds: 0
 --- !u!70 &1349397553114303341
 CapsuleCollider2D:

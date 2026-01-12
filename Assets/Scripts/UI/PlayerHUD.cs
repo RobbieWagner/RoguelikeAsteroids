@@ -42,7 +42,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             levelController.OnLevelStarted += OnLevelStarted;
             levelController.OnLevelCompleted += OnLevelCompleted;
-            levelController.OnLevelFailed += OnLevelFailed;
             levelController.LevelTimer.OnTimerUpdate += UpdateLevelTimer;
             levelController.LevelTimer.OnTimerComplete += CompleteLevelTimer;
             levelController.OnResourceAdded += OnLevelResourceAdded;
@@ -264,11 +263,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 healthSprites.Add(sprite);
             }
         }
-
-        private void OnLevelFailed()
-        {
-            HideHUD();
-        }
         
         private void OnLevelCompleted()
         {
@@ -298,7 +292,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
                 levelController.OnLevelStarted -= OnLevelStarted;
                 levelController.OnLevelCompleted -= OnLevelCompleted;
-                levelController.OnLevelFailed -= OnLevelFailed;
                 levelController.LevelTimer.OnTimerUpdate -= UpdateLevelTimer;
                 levelController.LevelTimer.OnTimerComplete -= CompleteLevelTimer;
                 levelController.OnResourceAdded -= OnLevelResourceAdded;
