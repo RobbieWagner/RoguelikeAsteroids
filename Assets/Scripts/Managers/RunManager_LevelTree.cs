@@ -133,42 +133,5 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             ConfigureLevelParameters(level);
             return level;
         }
-
-        private void LogLevelTree()
-        {
-            if (currentRun == null || currentRun.levelTree == null)
-            {
-                Debug.Log("No run or level tree to debug.");
-                return;
-            }
-            
-            Debug.Log("=== LEVEL TREE STRUCTURE ===");
-            Debug.Log($"Total tiers: {currentRun.tiers}");
-            Debug.Log($"Starting node: {currentRun.currentNode}");
-            
-            int totalLevels = 0;
-            for (int tier = 0; tier < currentRun.levelTree.Count; tier++)
-            {
-                totalLevels += currentRun.levelTree[tier].Count;
-                Debug.Log($"Tier {tier} ({currentRun.levelTree[tier].Count} nodes):");
-                
-                foreach (LevelNode node in currentRun.levelTree[tier])
-                {
-                    string connections = "Connects to: ";
-                    if (node.connections.Count == 0)
-                        connections += "None (end node)";
-                    else
-                    {
-                        foreach (LevelNode conn in node.connections)
-                            connections += $"[T{conn.tier}P{conn.positionInTier}:{conn.level.levelType}] ";
-                    }
-                    
-                    Debug.Log($"  - Node {node.positionInTier}: {node.level.levelType} | Diff: {node.level.difficultyMultiplier:F2} | {connections}");
-                }
-            }
-            
-            Debug.Log($"Total levels in tree: {totalLevels}");
-            Debug.Log("=== END TREE DEBUG ===");
-        }
 	}
 }

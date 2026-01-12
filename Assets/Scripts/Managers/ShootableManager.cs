@@ -57,10 +57,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         public void ConfigureForLevel(Level level)
         {
-            maxAsteroids = (int) (10 * level.difficultyMultiplier);
-
-            spawnCooldown = 1.5f/level.difficultyMultiplier;
-            
+            maxAsteroids = (int) (10 * level.difficultyMultiplier * 2);
+            spawnCooldown = 1f/level.difficultyMultiplier;
             speedRange = new Vector2(level.difficultyMultiplier, level.difficultyMultiplier + 2);
         }
 

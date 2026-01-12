@@ -43,6 +43,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             ClearUI();
             canvasGroup.alpha = 0;
             canvasGroup.interactable = false;
+            canvasGroup.transform.position = Vector3.zero;
             
             navigateAction = null;
             submitAction = null;
