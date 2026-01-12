@@ -68,6 +68,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if(other.gameObject.CompareTag("asteroid"))
             {
+                Debug.Log("hello");
                 other.GetComponent<Shootable>().destructionReason = DestructionReason.COLLISION_W_PLAYER;
                 Destroy(other.gameObject);
                 OnPlayerHit();

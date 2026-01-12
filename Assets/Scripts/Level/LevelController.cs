@@ -25,6 +25,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void OnPlayerHit(Player player)
         {
+            Debug.Log("lc");
             RunManager.Instance.CurrentRun.health--;
             if (RunManager.Instance.CurrentRun.health == 0)
                 OnPlayerDied();

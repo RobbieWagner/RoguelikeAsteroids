@@ -17,9 +17,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private float currentSpeed;
         private Vector2 currentDirection;
         [SerializeField] private Rigidbody2D rb2d;
+        [SerializeField] private Color shootableColor;
+        [SerializeField] private SpriteRenderer spriteRenderer;
 
         public float boundsRadius;
         public DestructionReason destructionReason {get; set;}
+        public DestructionParticles destructionParticlesPrefab;
 
         [SerializeField] private Collider2D shootableCollider;
         public ResourceGatherData resourceData = new ResourceGatherData();
@@ -29,6 +32,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected virtual void Awake() {
             GenerateRandomResources();
             destructionReason = DestructionReason.NONE;
+
+            spriteRenderer.color = shootableColor;
         }
 
         protected virtual void OnCollisionEnter2D(Collision2D collision)
@@ -45,6 +50,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             destructionReason = DestructionReason.BULLET_HIT;
             SpawnResourcePips();
+            if (destructionParticlesPrefab != null)
+            {
+                DestructionParticles particles = Instantiate(destructionParticlesPrefab, ShootableManager.Instance.transform);
+                particles.transform.position = transform.position;
+                ShootableManager.Instance.StartCoroutine(particles.PlayParticles(.5f, shootableColor * .8f));
+            }
             Destroy(gameObject);
         }
 

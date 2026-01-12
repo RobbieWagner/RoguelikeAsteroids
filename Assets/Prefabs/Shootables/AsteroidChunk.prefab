@@ -103,9 +103,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb2d: {fileID: 5284299000446031983}
+  shootableColor: {r: 0.42352942, g: 0.42352942, b: 0.42352942, a: 1}
+  spriteRenderer: {fileID: 2685866339164299372}
   boundsRadius: 0
+  destructionParticlesPrefab: {fileID: 1238371899346856121, guid: 11ac80b4cb9596941bb5e0458d218e15, type: 3}
   shootableCollider: {fileID: 8416668629706301235}
   durability: 1
+  doDestructionEffects: 1
   generateResources: 0
   coll: {fileID: 8416668629706301235}
   colliderEnableDelay: 0.5
