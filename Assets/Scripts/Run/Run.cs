@@ -11,11 +11,25 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     {
         public int runSeed;
         
-        // Configuration
+        [Header("Levels")]
         [Range(2,15)] public int tiers = 5;
         public float difficulty = 1f;
-        public float shopRatio = .1f;
         public bool includeBossLevels = true;
+        public LevelNode currentNode { get; set; }
+        [JsonIgnore] public int currentTier => currentNode != null ? currentNode.tier : -1;
+        public List<List<LevelNode>> levelTree = new List<List<LevelNode>>();
+        
+        [JsonIgnore] private Dictionary<string, LevelNode> _nodeLookup = new Dictionary<string, LevelNode>();
+        [JsonIgnore] public bool IsComplete => currentNode == null ? false : (levelTree.Count > 0 && 
+            currentNode.tier == levelTree.Count - 1 && currentNode.connections.Count == 0);
+        [JsonIgnore] public Level CurrentLevel => currentNode?.level;
+
+        [Header("Shopping/Items")]
+        [JsonProperty] [SerializedDictionary] public SerializedDictionary<ResourceType, int> runResources = new SerializedDictionary<ResourceType, int>();
+        public float shopRatio = .1f;
+        [JsonProperty] public List<ShopItemData> shopPurchases = new List<ShopItemData>();
+
+        [Header("Player")]
         public int startingHealth = 3;
         private int _health;
         public int health 
@@ -33,17 +47,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             } 
         }
         public event Action<int> OnUpdateHealth;
-
-        [JsonProperty] [SerializedDictionary] public SerializedDictionary<ResourceType, int> runResources = new SerializedDictionary<ResourceType, int>();
-        
-        public LevelNode currentNode { get; set; }
-        [JsonIgnore] public int currentTier => currentNode != null ? currentNode.tier : -1;
-        public List<List<LevelNode>> levelTree = new List<List<LevelNode>>();
-        
-        [JsonIgnore] private Dictionary<string, LevelNode> _nodeLookup = new Dictionary<string, LevelNode>();
-        [JsonIgnore] public bool IsComplete => currentNode == null ? false : (levelTree.Count > 0 && 
-            currentNode.tier == levelTree.Count - 1 && currentNode.connections.Count == 0);
-        [JsonIgnore] public Level CurrentLevel => currentNode?.level;
+        public float speedModifier = 0;
+        public float fireCooldownModifier = 0;
+        public float bulletSpeedModifier = 0;
+        public float fireRangeModifier = 0;
+        public int novaBlasts = 0;
 
         public void PrepForSerialization()
         {

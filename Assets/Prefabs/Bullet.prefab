@@ -102,6 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cbaec54f52891e43860a67d060b8d61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sprite: {fileID: 4930814057967639138}
 --- !u!70 &6703407832385577696
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

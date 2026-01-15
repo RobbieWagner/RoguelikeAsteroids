@@ -48,13 +48,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             	CompleteLevel();
         }
 
-        protected override void CompleteLevel()
+        public override void CompleteLevel()
         {
             base.CompleteLevel();
             StartCoroutine(DisplayLevelCompletionScreen());
         }
 		
-		protected override void FailLevel()
+		public override void FailLevel()
         {
             collectedResources.Clear();
             base.FailLevel();

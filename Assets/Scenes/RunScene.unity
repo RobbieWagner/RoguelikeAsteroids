@@ -916,11 +916,17 @@ MonoBehaviour:
     runSeed: 0
     tiers: 15
     difficulty: 1
-    shopRatio: 0
     includeBossLevels: 1
-    startingHealth: 3
     runResources:
       _serializedList: []
+    shopRatio: 0.15
+    shopPurchases: []
+    startingHealth: 3
+    speedModifier: 0
+    fireCooldownModifier: 0
+    bulletSpeedModifier: 0
+    fireRangeModifier: 0
+    novaBlasts: 0
 --- !u!1 &787836636
 GameObject:
   m_ObjectHideFlags: 0

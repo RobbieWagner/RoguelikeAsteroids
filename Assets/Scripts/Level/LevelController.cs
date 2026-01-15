@@ -25,7 +25,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void OnPlayerHit(Player player)
         {
-            Debug.Log("lc");
             RunManager.Instance.CurrentRun.health--;
             if (RunManager.Instance.CurrentRun.health == 0)
                 OnPlayerDied();
@@ -60,13 +59,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             levelDetails = level;
         }
 
-        protected virtual void CompleteLevel()
+        public virtual void CompleteLevel()
         {
             InputManager.Instance.DisableActionMap(ActionMapName.GAME);
             OnLevelCompleted?.Invoke();
         }
 
-        protected virtual void FailLevel()
+        public virtual void FailLevel()
         {
             OnLevelFailed?.Invoke();
             InputManager.Instance.DisableActionMap(ActionMapName.GAME);

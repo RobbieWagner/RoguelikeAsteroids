@@ -12,11 +12,12 @@ namespace RobbieWagnerGames.Audio
         AsteroidDestroyed = 3,
         PointGain = 4,
         LeafGain = 5,
-        FlowerGain = 6,
+        PlayerHit = 6,
         Purchase = 7,
         Music = 8,
         UIFail = 9,
-        ResourceCollected = 10
+        ResourceCollected = 10,
+        PlayerDestroyed = 11,
     }
 
     /// <summary>

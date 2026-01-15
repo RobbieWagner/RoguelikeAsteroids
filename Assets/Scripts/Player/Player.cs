@@ -13,7 +13,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     {
         [Header("Movement")]
         private Vector2 movementInput = Vector2.zero;
-        [SerializeField] private float speed = 5;
+        public float speed = 10;
         [SerializeField] private Rigidbody2D rb2d;
         [SerializeField] private Collider2D coll;
         
@@ -27,12 +27,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private Vector2 lookVector = Vector2.zero;
 
         [Header("Shooter")]
-        [SerializeField] private float shooterCooldown = 1f;
+        public float shooterCooldown = 3f;
         private float shooterCooldownTimer = 0f;
         [SerializeField] private Bullet bullet;
         [SerializeField] private float bulletSpawnDistance = .5f; 
-        [SerializeField] private float bulletSpeed = 50;
-        [SerializeField] private float bulletTimeToLive = 2f;
+        public float bulletSpeed = 50;
+        public float fireRange = 1.5f;
         [SerializeField] private AudioSource fireSound;
 
         [SerializeField] private Vector2 movementBounds;
@@ -53,8 +53,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             EnableControls();
 
             PlayerManager.Instance.RegisterPlayer(this);
-
-
         }
 
         private void Update()
@@ -68,7 +66,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if(other.gameObject.CompareTag("asteroid"))
             {
-                Debug.Log("hello");
                 other.GetComponent<Shootable>().destructionReason = DestructionReason.COLLISION_W_PLAYER;
                 Destroy(other.gameObject);
                 OnPlayerHit();
@@ -182,7 +179,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             yield return null;
 
-            StartCoroutine(newBullet.Fire(aimDirection, bulletSpeed, bulletTimeToLive));
+            float bulletTimeToLive = fireRange/speed;
+            newBullet.Fire(aimDirection, bulletSpeed, bulletTimeToLive);
         }
 
         public void DisableControls() => InputManager.Instance.DisableActionMap(ActionMapName.GAME);
