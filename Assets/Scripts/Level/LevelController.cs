@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using DG.Tweening;
+using RobbieWagnerGames.Audio;
 using RobbieWagnerGames.Managers;
 using UnityEngine;
 
@@ -30,6 +31,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 OnPlayerDied();
             else
             {
+                BasicAudioManager.Instance.Play(AudioSourceName.PlayerHit);
                 player.DisableColliderTemporarily(2f);
                 ShakeScreen();
             }
@@ -80,6 +82,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         public void OnPlayerDied()
         {
+            BasicAudioManager.Instance.Play(AudioSourceName.PlayerDestroyed);
 			if (failOnDeath)
 				FailLevel();
 			else

@@ -121,12 +121,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private void CollectPip()
         {
-            if (isCollected) return;
+            if (isCollected) 
+                return;
             
             isCollected = true;
-            
             BasicAudioManager.Instance?.Play(AudioSourceName.ResourceCollected);
-            
             OnPipCollected?.Invoke(this, resourceType, amount);
         }
         
