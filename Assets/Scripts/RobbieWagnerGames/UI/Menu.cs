@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using RobbieWagnerGames.Managers;
 using System.Collections;
 using UnityEngine.InputSystem;
+using RobbieWagnerGames.Audio;
 
 namespace RobbieWagnerGames.UI
 {
@@ -28,8 +29,8 @@ namespace RobbieWagnerGames.UI
                 
                 if (_activeMenu != null)
                 {
-                    _activeMenu.StartCoroutine(_activeMenu.RefreshInputHandling());
                     _activeMenu.Open();
+                    _activeMenu.StartCoroutine(_activeMenu.RefreshInputHandling());
                     _activeMenu.StartInputHandling();
                 }
             }
@@ -287,10 +288,13 @@ namespace RobbieWagnerGames.UI
         
         public virtual void Open()
         {
+            Debug.Log("open");
             if (disableGameControlsWhenOpen)
             {
                 previousActiveMaps.Clear();
                 previousActiveMaps.AddRange(InputManager.Instance.CurrentActiveMaps);
+                foreach (var map in previousActiveMaps)
+                    Debug.Log(map.ToString());
             }
 
             InputManager.Instance.EnableActionMap(ActionMapName.UI);
@@ -684,6 +688,7 @@ namespace RobbieWagnerGames.UI
         protected virtual void OnClosed() { }
         protected virtual void OnElementSelected(Selectable element)
         {
+            BasicAudioManager.Instance.Play(AudioSourceName.UINav, false);
             UpdateSelectionIcon(element);
         }
 

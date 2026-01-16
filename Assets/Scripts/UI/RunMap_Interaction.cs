@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using System.Collections;
 using System;
+using RobbieWagnerGames.Audio;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -266,6 +267,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void SelectButton(LevelButton button)
         {
+            BasicAudioManager.Instance.Play(AudioSourceName.UINav, false);
             if (button == null || !button.button.interactable) return;
             
             if (selectedButton != null && selectedButton != button)

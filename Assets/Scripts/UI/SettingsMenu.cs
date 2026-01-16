@@ -5,6 +5,8 @@ using RobbieWagnerGames.Managers;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using System.Collections;
+using RobbieWagnerGames.Audio;
+using AYellowpaper.SerializedCollections;
 
 namespace RobbieWagnerGames.UI
 {
@@ -27,6 +29,10 @@ namespace RobbieWagnerGames.UI
         [SerializeField] private Slider hazardVolumeSlider;
         [SerializeField] private Slider playerVolumeSlider;
         [SerializeField] private AudioMixer audioMixer;
+
+        [SerializeField] private AudioSource uiNavSource;
+
+        [SerializedDictionary("MixerGroupName","MixerGroup")][SerializeField] private SerializedDictionary<AudioMixerGroupName, AudioMixerGroup> mixerGroups;
         
         private Tab currentTab = Tab.GRAPHICS;
         
@@ -38,8 +44,11 @@ namespace RobbieWagnerGames.UI
 
         protected override void Awake()
         {
-            base.Awake();
+            if (uiNavSource == null)
+                uiNavSource = BasicAudioManager.Instance.audioSources[AudioSourceName.UINav];
             
+            base.Awake();
+
             graphicsTabButton.onClick.AddListener(() => SwitchTab(Tab.GRAPHICS));
             audioTabButton.onClick.AddListener(() => SwitchTab(Tab.AUDIO));
             
@@ -86,6 +95,7 @@ namespace RobbieWagnerGames.UI
                 
                 if (input != Vector2.zero && (lastControllerInput == Vector2.zero || Time.time - lastControllerNavigationTime > controllerRepeatRate))
                 {
+                    BasicAudioManager.Instance.Play(AudioSourceName.UINav, false);
                     HandleNavigationInput(input);
                     lastControllerNavigationTime = Time.time;
                 }
@@ -176,6 +186,7 @@ namespace RobbieWagnerGames.UI
         {   
             if (currentTab == tab) return;
             
+            uiNavSource.outputAudioMixerGroup = mixerGroups[AudioMixerGroupName.UI];
             EventSystemManager.Instance.SetSelected(null);
             
             currentTab = tab;
@@ -259,23 +270,23 @@ namespace RobbieWagnerGames.UI
         {
             base.Close();
             SaveSettings();
+            uiNavSource.outputAudioMixerGroup = mixerGroups[AudioMixerGroupName.UI];
         }
 
         private void UpdateAudioMixer()
         {
             if (audioMixer == null) return;
             
-            float masterVolume = Mathf.Lerp(-80f, 0f, masterVolumeSlider.value);
-            float musicVolume = Mathf.Lerp(-80f, 0f, musicVolumeSlider.value);
-            float uiVolume = Mathf.Lerp(-80f, 0f, uiVolumeSlider.value);
-            float hazardVolume = Mathf.Lerp(-80f, 0f, hazardVolumeSlider.value);
-            float playerVolume = Mathf.Lerp(-80f, 0f, playerVolumeSlider.value);
-            
-            audioMixer.SetFloat("main", masterVolume);
-            audioMixer.SetFloat("music", musicVolume);
-            audioMixer.SetFloat("ui", uiVolume);
-            audioMixer.SetFloat("hazard", hazardVolume);
-            audioMixer.SetFloat("player", playerVolume);
+            Dictionary<string, float> audioMixerVolumes = new Dictionary<string, float>
+            {
+                { "main", masterVolumeSlider.value },
+                { "music", musicVolumeSlider.value },
+                { "ui", uiVolumeSlider.value },
+                { "hazard", hazardVolumeSlider.value },
+                { "player", playerVolumeSlider.value }
+            };
+
+            AudioMixerController.Instance.UpdateAudioMixer(audioMixerVolumes);
         }
 
         private void SaveSettings()
@@ -291,30 +302,35 @@ namespace RobbieWagnerGames.UI
         
         private void OnMasterVolumeChanged(float value)
         {
+            uiNavSource.outputAudioMixerGroup = mixerGroups[AudioMixerGroupName.MAIN];
             PlayerPrefs.SetFloat("MasterVolume", value);
             UpdateAudioMixer();
         }
         
         private void OnMusicVolumeChanged(float value)
-        {
+        {            
+            uiNavSource.outputAudioMixerGroup = mixerGroups[AudioMixerGroupName.MUSIC];
             PlayerPrefs.SetFloat("MusicVolume", value);
             UpdateAudioMixer();
         }
         
         private void OnUIVolumeChanged(float value)
         {
+            uiNavSource.outputAudioMixerGroup = mixerGroups[AudioMixerGroupName.UI];
             PlayerPrefs.SetFloat("UIVolume", value);
             UpdateAudioMixer();
         }
         
         private void OnHazardVolumeChanged(float value)
         {
+            uiNavSource.outputAudioMixerGroup = mixerGroups[AudioMixerGroupName.HAZARD];
             PlayerPrefs.SetFloat("HazardVolume", value);
             UpdateAudioMixer();
         }
         
         private void OnPlayerVolumeChanged(float value)
         {
+            uiNavSource.outputAudioMixerGroup = mixerGroups[AudioMixerGroupName.PLAYER];
             PlayerPrefs.SetFloat("PlayerVolume", value);
             UpdateAudioMixer();
         }

@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using RobbieWagnerGames.Audio;
 using RobbieWagnerGames.Managers;
 using RobbieWagnerGames.UI;
 using RobbieWagnerGames.Utilities;
@@ -20,6 +22,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public event Action OnGameResumed;
         
         private Coroutine sceneTransitionCo = null;
+        [SerializeField] private SettingsMenu settingsMenu = null;
 
         protected override void Awake()
         {
@@ -29,6 +32,17 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void LoadMenu()
         {
+            Dictionary<string, float> audioMixerVolumes = new Dictionary<string, float>
+            {
+                { "main", PlayerPrefs.GetFloat("MasterVolume", 1f)},
+                { "music", PlayerPrefs.GetFloat("MusicVolume", 1f)},
+                { "ui", PlayerPrefs.GetFloat("UIVolume", 1f) },
+                { "hazard", PlayerPrefs.GetFloat("HazardVolume", 1f) },
+                { "player", PlayerPrefs.GetFloat("PlayerVolume", 1f) }  
+            };
+            AudioMixerController.Instance.UpdateAudioMixer(audioMixerVolumes);
+            
+
             StartCoroutine(SceneLoadManager.Instance.LoadSceneAdditive("MenuScene", false));
         }
 

@@ -28,7 +28,7 @@ namespace RobbieWagnerGames.Audio
         [Header("Audio Sources")]
         [Tooltip("Mapping of audio source names to their respective AudioSource components")]
         [SerializeField][SerializedDictionary("Source Type", "Audio Source")] 
-        private SerializedDictionary<AudioSourceName, AudioSource> audioSources = 
+        public SerializedDictionary<AudioSourceName, AudioSource> audioSources = 
             new SerializedDictionary<AudioSourceName, AudioSource>();
 
         [Header("Settings")]
@@ -51,9 +51,9 @@ namespace RobbieWagnerGames.Audio
         /// <summary>
         /// Plays the specified audio source if it exists
         /// </summary>
-        public void Play(AudioSourceName name)
+        public void Play(AudioSourceName name, bool ignoreActiveState = true)
         {
-            if (TryGetAudioSource(name, out AudioSource source))
+            if (TryGetAudioSource(name, out AudioSource source) && (ignoreActiveState || !source.isPlaying))
             {
                 source.Play();
             }

@@ -165,7 +165,7 @@ namespace RobbieWagnerGames.UI
         protected override void OnElementSelected(Selectable element)
         {
             base.OnElementSelected(element);
-            BasicAudioManager.Instance.Play(AudioSourceName.UINav);
+            BasicAudioManager.Instance.Play(AudioSourceName.UINav, false);
         }
         
         protected override void OnElementSubmitted(Selectable element)
