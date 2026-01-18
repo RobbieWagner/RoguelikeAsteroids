@@ -24,7 +24,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             PlayerManager.Instance.OnPlayerHit += OnPlayerHit;
         }
 
-        private void OnPlayerHit(Player player)
+        protected void OnPlayerHit(Player player)
         {
             RunManager.Instance.CurrentRun.health--;
             if (RunManager.Instance.CurrentRun.health == 0)

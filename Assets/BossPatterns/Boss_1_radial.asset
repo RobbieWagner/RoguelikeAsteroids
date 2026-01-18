@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3005b73aeec06b34daacd29ce259e86d, type: 3}
+  m_Name: Boss_1_radial
+  m_EditorClassIdentifier: 
+  patternName: FullScreenRadial
+  duration: 8
+  canBeInterrupted: 0
+  projectilePrefab: {fileID: 6669817074741348616, guid: 5e8d759164b65084481e90aa832911dc, type: 3}
+  damage: 1
+  attackSpeed: 10
+  numberOfProjectiles: 16
+  spreadAngle: 180

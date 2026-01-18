@@ -42,7 +42,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 				levelTimer.StartTimer(level.levelDuration);
         }
 		
-		private void OnLevelTimerComplete()
+		protected virtual void OnLevelTimerComplete()
         {
 			if(levelDetails.stopAtTimer)
             	CompleteLevel();

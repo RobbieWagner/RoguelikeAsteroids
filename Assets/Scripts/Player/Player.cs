@@ -64,7 +64,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void OnTriggerStay2D(Collider2D other)
         {
-            if(other.gameObject.CompareTag("asteroid"))
+            if(other.gameObject.CompareTag("asteroid") || other.gameObject.CompareTag("hazard"))
             {
                 other.GetComponent<Shootable>().destructionReason = DestructionReason.COLLISION_W_PLAYER;
                 Destroy(other.gameObject);
