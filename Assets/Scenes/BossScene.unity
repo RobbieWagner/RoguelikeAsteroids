@@ -368,7 +368,7 @@ GameObject:
   - component: {fileID: 289321895}
   - component: {fileID: 289321894}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Border
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -556,7 +556,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+  m_Color: {r: 0.7, g: 0.25, b: 0.5, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -902,7 +902,7 @@ GameObject:
   - component: {fileID: 944129978}
   m_Layer: 0
   m_Name: Boss
-  m_TagString: Untagged
+  m_TagString: asteroid
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1005,19 +1005,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb2d: {fileID: 944129980}
-  shootableColor: {r: 1, g: 1, b: 1, a: 1}
+  shootableColor: {r: 0.8, g: 0, b: 0.4, a: 1}
   spriteRenderer: {fileID: 944129982}
   boundsRadius: 1000
   destructionParticlesPrefab: {fileID: 1238371899346856121, guid: 11ac80b4cb9596941bb5e0458d218e15, type: 3}
   shootableCollider: {fileID: 944129979}
-  durability: 1
+  durability: 30
   doDestructionEffects: 1
-  maxHealth: 30
   introPhase:
-  - state: 3
-    duration: 1
   - state: 0
-    duration: 2
+    duration: 0.5
   - state: 4
     duration: 2
   bossPhases:
@@ -1101,7 +1098,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8, g: 0, b: 0.4, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1120,7 +1117,7 @@ Transform:
   m_GameObject: {fileID: 944129977}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4, z: 0}
+  m_LocalPosition: {x: 0, y: 6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1638,6 +1635,7 @@ RectTransform:
   - {fileID: 182450081}
   - {fileID: 867616236}
   - {fileID: 289321893}
+  - {fileID: 1423884719}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1662,13 +1660,15 @@ MonoBehaviour:
   resourceUIPrefab: {fileID: 3004665645326433716, guid: 9ea4a42b291359e479ac28f06d4e6a34, type: 3}
   showAllResources: 1
   hideEmptyResources: 1
+  levelStartGraphic: {fileID: 1423884720}
   levelController: {fileID: 1084862548}
   levelText: {fileID: 1868694198}
   timeSlider: {fileID: 1491039171}
   timeSliderFill: {fileID: 1279140166}
   healthImageParent: {fileID: 1177504756}
   healthSpritePrefab: {fileID: 4693473916626061162, guid: 2bdc2833cf1e15b4f8b69e4fd072ba60, type: 3}
-  bossHealthSlider: {fileID: 0}
+  bossHealthSlider: {fileID: 1599107410}
+  boss: {fileID: 944129981}
 --- !u!1 &1269927391
 GameObject:
   m_ObjectHideFlags: 0
@@ -2117,6 +2117,81 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 165206a5f0a03d84d96e42b0567f141f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1423884718
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1423884719}
+  - component: {fileID: 1423884721}
+  - component: {fileID: 1423884720}
+  m_Layer: 5
+  m_Name: LevelStartGraphic
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1423884719
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423884718}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1267288565}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 550, y: 0}
+  m_SizeDelta: {x: 128, y: 42}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1423884720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423884718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: dfea34aece525fa469f771ad56c8dacf, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1423884721
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423884718}
+  m_CullTransparentMesh: 1
 --- !u!1 &1491039169
 GameObject:
   m_ObjectHideFlags: 0

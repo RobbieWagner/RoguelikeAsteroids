@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using RobbieWagnerGames.Utilities;
 using TMPro;
 using System;
+using DG.Tweening;
+using System.Collections;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -15,6 +17,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private ResourceUI resourceUIPrefab;
         [SerializeField] private bool showAllResources = true;
         [SerializeField] private bool hideEmptyResources = true;
+        [SerializeField] private Image levelStartGraphic;
         
         [Header("Level Info")]
         [SerializeField] private AsteroidsLevelController levelController;
@@ -246,6 +249,17 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             float totalWidth = heartWidth * hearts + spacing * (hearts - 1);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, totalWidth);
             UpdateHealthUI(RunManager.Instance.CurrentRun.health);
+        }
+
+        public IEnumerator DisplayLevelStart(Action callback = null)
+        {
+            levelStartGraphic.rectTransform.DOAnchorPos(Vector2.zero, .5f);
+            yield return levelStartGraphic.DOColor(Color.white, .5f).WaitForCompletion();
+            yield return new WaitForSeconds(.5f);
+            levelStartGraphic.rectTransform.DOAnchorPos(Vector2.left * 550, .5f);
+            yield return levelStartGraphic.DOColor(Color.clear, .5f).WaitForCompletion();
+
+            callback?.Invoke();
         }
 
         private void UpdateHealthUI(int health)

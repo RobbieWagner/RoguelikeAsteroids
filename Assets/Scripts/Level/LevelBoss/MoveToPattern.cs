@@ -8,7 +8,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     public class MoveToPattern : BossMovementPattern
     {   
 		[SerializeField] private Vector2 location;
-        public override IEnumerator ExecutePattern(LevelBoss boss, System.Action onComplete = null)
+        public override IEnumerator ExecutePattern(LevelBoss boss, float duration = 1, System.Action onComplete = null)
         {
 			Transform bossTransform = boss.transform;
 

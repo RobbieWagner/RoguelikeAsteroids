@@ -40,15 +40,20 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if(collision.gameObject.CompareTag("bullet"))
             {
-                durability--;
-                if (durability <= 0)
-                    OnShootableDestroyedFromShot();
+                destructionReason = DestructionReason.BULLET_HIT;
+                DecreaseDurability();
             }
         }
 
-        protected virtual void OnShootableDestroyedFromShot()
+        public virtual void DecreaseDurability(int damage = 1)
         {
-            destructionReason = DestructionReason.BULLET_HIT;
+            durability--;
+            if (durability <= 0)
+                DestroyShootable();
+        }
+
+        protected virtual void DestroyShootable()
+        {
             SpawnResourcePips();
             if (destructionParticlesPrefab != null)
             {

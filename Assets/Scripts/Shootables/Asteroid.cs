@@ -20,10 +20,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             base.Awake();
         }
 
-        protected override void OnShootableDestroyedFromShot()
+        protected override void DestroyShootable()
         {
             BasicAudioManager.Instance.Play(AudioSourceName.AsteroidDestroyed);
-            base.OnShootableDestroyedFromShot();
+            base.DestroyShootable();
         }
 
         protected override void GenerateRandomResources()

@@ -5,10 +5,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 {
     public abstract class BossPattern : ScriptableObject
     {
-        public float duration;
         public bool canBeInterrupted = false;
         
-        public abstract IEnumerator ExecutePattern(LevelBoss boss, System.Action onComplete = null);
+        public abstract IEnumerator ExecutePattern(LevelBoss boss, float duration = 1, System.Action onComplete = null);
         public abstract void CancelPattern();
     }
 
@@ -18,7 +17,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
     public abstract class BossAttackPattern : BossPattern
     {
-        public GameObject projectilePrefab;
+        public Bullet projectilePrefab;
         public int damage = 1;
         public float attackSpeed = 10f;
     }

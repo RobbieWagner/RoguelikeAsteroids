@@ -53,6 +53,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected virtual void StartLevel(Level level)
         {
             ConfigureLevel(level);
+            StartCoroutine(PlayerHUD.Instance.DisplayLevelStart(() => {OnLevelStarted?.Invoke();}));
+        }
+
+        protected void InvokeLevelStartAction()
+        {
             OnLevelStarted?.Invoke();
         }
 
@@ -101,7 +106,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         protected virtual void UnsubscribeEvents()
         {
-            RunManager.Instance.OnStartLevel -= ConfigureLevel;
+            RunManager.Instance.OnStartLevel -= StartLevel;
         }
     }
 }

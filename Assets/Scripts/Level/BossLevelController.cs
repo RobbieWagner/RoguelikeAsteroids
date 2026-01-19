@@ -16,9 +16,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         protected override void StartLevel(Level level)
         {
-            base.StartLevel(level);
             Player.Instance?.DisableControls();
             StartBossBattle();
+            ConfigureLevel(level);
         }
         
         private void StartBossBattle()
@@ -31,8 +31,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private void OnIntroPhaseComplete()
         {
-            Player.Instance?.EnableControls();
-            ShootableManager.Instance.StartAsteroidSpawner();
+            StartCoroutine(PlayerHUD.Instance.DisplayLevelStart(() => 
+            {
+                Player.Instance?.EnableControls();
+                ShootableManager.Instance.StartAsteroidSpawner();
+                boss.CheckHealthThresholdTransitions();
+                InvokeLevelStartAction();
+            }));
         }
         
         private void OnOutroPhaseComplete()

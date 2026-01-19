@@ -41,7 +41,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     public class LevelBoss : Shootable
     {
         [Header("Boss Configuration")]
-        [SerializeField] private int maxHealth = 30;
         [SerializeField] private List<BossPhaseState> introPhase;
         [SerializedDictionary("healthThreshold", "statesToActivate")][SerializeField] 
         private SerializedDictionary<float, List<BossPhaseState>> bossPhases = new SerializedDictionary<float, List<BossPhaseState>>();
@@ -55,14 +54,18 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [Header("State Machine")]
         private BossState currentState;
         private Coroutine currentPhaseRoutine;
-        private int currentHealth;
+        private int startingDurability;
         private bool isDefeated = false;
+        
+        private float currentPhaseThreshold = -1f;
+        private float queuedPhaseThreshold = -1f;
         
         [Header("Visuals")]
         [SerializeField] private Animator animator;
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private ParticleSystem damageParticles;
-        
+
+        public event Action OnBossDamaged;
         public event Action OnBossDestroyed;
         public event Action<BossState> OnStateChanged;
         public event Action OnIntroPhaseComplete;
@@ -71,7 +74,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected override void Awake()
         {
             base.Awake();
-            currentHealth = maxHealth;
+            startingDurability = durability;
             InitializeBoss();
         }
         
@@ -95,6 +98,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private void StartOutroPhase()
         {
+            queuedPhaseThreshold = -1f;
+            
             if (currentPhaseRoutine != null)
                 StopCoroutine(currentPhaseRoutine);
                 
@@ -105,24 +110,38 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if (!bossPhases.ContainsKey(healthThreshold) || isDefeated) return;
             
+            if (Mathf.Approximately(currentPhaseThreshold, healthThreshold))
+                return;
+            
             if (currentPhaseRoutine != null)
                 StopCoroutine(currentPhaseRoutine);
-                
+            
+            currentPhaseThreshold = healthThreshold;
             currentPhaseRoutine = StartCoroutine(ExecuteBossPhase(bossPhases[healthThreshold]));
+        }
+        
+        private void QueueBossPhaseTransition(float healthThreshold)
+        {
+            if (!bossPhases.ContainsKey(healthThreshold) || isDefeated) return;
+            
+            if (Mathf.Approximately(currentPhaseThreshold, healthThreshold) || Mathf.Approximately(queuedPhaseThreshold, healthThreshold))
+                return;
+            
+            queuedPhaseThreshold = healthThreshold;
         }
         
         private IEnumerator ExecuteIntroPhase()
         {
-            Debug.Log("Starting intro phase execution");
             yield return ExecutePhaseSequence(introPhase);
-            Debug.Log("Intro phase sequence complete, invoking callback");
             OnIntroPhaseComplete?.Invoke();
         }
         
         private IEnumerator ExecuteOutroPhase()
         {
+            ChangeState(BossState.DEFEATED);
             yield return ExecutePhaseSequence(outroPhase);
             OnOutroPhaseComplete?.Invoke();
+            OnBossDestroyed?.Invoke();
         }
         
         private IEnumerator ExecuteBossPhase(List<BossPhaseState> phase)
@@ -135,16 +154,15 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             foreach (BossPhaseState phaseState in phase)
             {
+                if (queuedPhaseThreshold >= 0)
+                    yield break;
+                    
                 ChangeState(phaseState.state);
-                
-                yield return ExecuteStatePattern(phaseState.state);
-                
-                if (phaseState.duration > 0)
-                    yield return new WaitForSeconds(phaseState.duration);
+                yield return ExecuteStatePattern(phaseState.state, phaseState.duration);
             }
         }
         
-        private IEnumerator ExecuteStatePattern(BossState state)
+        private IEnumerator ExecuteStatePattern(BossState state, float duration)
         {
             if (!patterns.ContainsKey(state) || patterns[state] == null)
             {
@@ -156,10 +174,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             BossMovementPattern movePattern = pattern.movementPattern;
             BossAttackPattern attackPattern = pattern.attackPattern;
             
-            yield return ExecutePatternPair(movePattern, attackPattern);
+            yield return ExecutePatternPair(movePattern, attackPattern, duration);
         }
         
-        private IEnumerator ExecutePatternPair(BossMovementPattern movePattern, BossAttackPattern attackPattern)
+        private IEnumerator ExecutePatternPair(BossMovementPattern movePattern, BossAttackPattern attackPattern, float duration)
         {
             if (movePattern == null && attackPattern == null)
                 yield break;
@@ -170,8 +188,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             if (movePattern != null)
             {
-                Debug.Log("move");
-                Coroutine moveCoroutine = StartCoroutine(ExecuteSinglePattern(movePattern, () => movePatternCompleted = true));
+                Coroutine moveCoroutine = StartCoroutine(ExecuteSinglePattern(movePattern, duration, () => movePatternCompleted = true));
                 runningCoroutines.Add(moveCoroutine);
             }
             else
@@ -179,13 +196,24 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             if (attackPattern != null)
             {
-                Coroutine attackCoroutine = StartCoroutine(ExecuteSinglePattern(attackPattern, () => attackPatternCompleted = true));
+                Coroutine attackCoroutine = StartCoroutine(ExecuteSinglePattern(attackPattern, duration, () => attackPatternCompleted = true));
                 runningCoroutines.Add(attackCoroutine);
             }
             else
                 attackPatternCompleted = true;
             
-            yield return new WaitUntil(() => movePatternCompleted && attackPatternCompleted);
+            float elapsedTime = 0f;
+            while (elapsedTime < duration && !movePatternCompleted && !attackPatternCompleted)
+            {
+                if (queuedPhaseThreshold >= 0)
+                    break;
+                
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            
+            if (queuedPhaseThreshold < 0)
+                yield return new WaitUntil(() => movePatternCompleted && attackPatternCompleted);
             
             foreach (Coroutine coroutine in runningCoroutines)
             {
@@ -194,7 +222,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             }
         }
         
-        private IEnumerator ExecuteSinglePattern(BossPattern pattern, Action onComplete = null)
+        private IEnumerator ExecuteSinglePattern(BossPattern pattern, float duration, Action onComplete = null)
         {
             if (pattern == null)
             {
@@ -204,12 +232,20 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             bool patternCompleted = false;
             
-            yield return pattern.ExecutePattern(this, () => {
+            yield return pattern.ExecutePattern(this, duration, () => {
                 patternCompleted = true;
                 onComplete?.Invoke();
             });
             
-            yield return new WaitUntil(() => patternCompleted);
+            float elapsedTime = 0f;
+            while (elapsedTime < duration && !patternCompleted)
+            {
+                if (queuedPhaseThreshold >= 0)
+                    break;
+                
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
         }
         
         private void ChangeState(BossState newState)
@@ -220,50 +256,67 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             OnStateChanged?.Invoke(newState);
             
             animator.SetInteger("BossState", (int)newState);
-            
-            Debug.Log($"Boss state changed to: {newState}");
         }
-        
-        public void TakeDamage(int damage)
+
+        public override void DecreaseDurability(int damage = 1)
         {
             if (isDefeated) return;
             
-            currentHealth -= damage;
+            durability -= damage;
             
             StartCoroutine(FlashDamage());
             damageParticles.Play();
             
-            CheckHealthThresholdTransitions();
+            OnBossDamaged?.Invoke();
 
-            if (currentHealth <= 0 && !isDefeated)
+            if (durability <= 0 && !isDefeated)
+            {
                 DestroyBoss();
+                return;
+            }
+            
+            CheckHealthThresholdTransitions();
         }
         
         private IEnumerator FlashDamage()
         {
-            spriteRenderer.color = Color.red;
+            Color originalColor = spriteRenderer.color;
+            Color oppositeColor = new Color(1f - originalColor.r,1f - originalColor.g,1f - originalColor.b,originalColor.a);
+            
+            spriteRenderer.color = oppositeColor;
             yield return new WaitForSeconds(0.1f);
-            spriteRenderer.color = Color.white;
+            spriteRenderer.color = originalColor;
         }
         
-        private void CheckHealthThresholdTransitions()
+        public void CheckHealthThresholdTransitions()
         {
             if (isDefeated) return;
             
-            float healthPercentage = (float) currentHealth / maxHealth;
+            float healthPercentage = (float)durability / startingDurability;
             
-            List<float> sortedThresholds = bossPhases.Keys.OrderByDescending(k => k).ToList();
+            List<float> sortedThresholds = bossPhases.Keys.OrderBy(k => k).ToList();
             
+            float targetThreshold = -1f;
             foreach (float threshold in sortedThresholds)
             {
-                if (healthPercentage <= threshold && bossPhases.ContainsKey(threshold))
-                    StartBossPhase(threshold);
+                if (healthPercentage <= threshold)
+                {
+                    targetThreshold = threshold;
+                    break; 
+                }
+            }
+            
+            if (targetThreshold >= 0)
+            {
+                if (currentPhaseRoutine != null && currentPhaseThreshold >= 0)
+                    QueueBossPhaseTransition(targetThreshold);
+                else
+                    StartBossPhase(targetThreshold);
             }
         }
         
         private void DestroyBoss()
         {
-            Debug.Log($"DestroyBoss called. isDefeated: {isDefeated}, currentHealth: {currentHealth}");
             isDefeated = true;
             StartOutroPhase();
         }

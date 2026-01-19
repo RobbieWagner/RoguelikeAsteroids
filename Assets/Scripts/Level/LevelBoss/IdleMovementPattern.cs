@@ -6,7 +6,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 	[CreateAssetMenu(menuName = "RoguelikeAsteroids/Boss Patterns/Idle Movement")]
     public class IdleMovementPattern : BossMovementPattern
     {   
-        public override IEnumerator ExecutePattern(LevelBoss boss, System.Action onComplete = null)
+        public override IEnumerator ExecutePattern(LevelBoss boss, float duration = 1, System.Action onComplete = null)
         {
             yield return new WaitForSeconds(duration);       
             onComplete?.Invoke();

@@ -12,10 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3005b73aeec06b34daacd29ce259e86d, type: 3}
   m_Name: Boss_1_radial
   m_EditorClassIdentifier: 
-  patternName: FullScreenRadial
-  duration: 8
   canBeInterrupted: 0
-  projectilePrefab: {fileID: 6669817074741348616, guid: 5e8d759164b65084481e90aa832911dc, type: 3}
+  projectilePrefab: {fileID: 5020893541606596653, guid: 5e8d759164b65084481e90aa832911dc, type: 3}
   damage: 1
   attackSpeed: 10
   numberOfProjectiles: 16

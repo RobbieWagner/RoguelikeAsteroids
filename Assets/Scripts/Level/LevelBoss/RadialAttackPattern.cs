@@ -10,24 +10,24 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public int numberOfProjectiles = 8;
         public float spreadAngle = 360f;
         
-        
-        // Have follow the player?
-        public override IEnumerator ExecutePattern(LevelBoss boss, System.Action onComplete = null)
+        public override IEnumerator ExecutePattern(LevelBoss boss, float duration = 1, System.Action onComplete = null)
         {
             Transform bossTransform = boss.transform;
+            Vector2 bossPos = boss.transform.position;
+            Vector2 toCenter = (Vector2.zero - bossPos).normalized;
+            float centerAngle = Mathf.Atan2(toCenter.y, toCenter.x) * Mathf.Rad2Deg;
+            float startAngle = centerAngle - spreadAngle;
             
             for (int i = 0; i < numberOfProjectiles; i++)
             {
-                float angle = spreadAngle / numberOfProjectiles * i;
+                float angle = spreadAngle / numberOfProjectiles * i + startAngle;
                 Vector2 direction = Quaternion.Euler(0, 0, angle) * Vector2.up;
                 
-                GameObject projectile = Instantiate(projectilePrefab, 
+                Bullet projectile = Instantiate(projectilePrefab, 
                     bossTransform.position, 
                     Quaternion.identity);
-                
-                Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
-                if (rb != null)
-                    rb.linearVelocity = direction * attackSpeed;
+
+                projectile.Fire(direction, attackSpeed, 4);
                 
                 yield return new WaitForSeconds(0.1f);
             }

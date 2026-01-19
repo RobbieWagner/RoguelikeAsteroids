@@ -11,9 +11,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private  float startAngle = 0f;
         [SerializeField] private Vector2 center;
         
-        public override IEnumerator ExecutePattern(LevelBoss boss, System.Action onComplete = null)
+        public override IEnumerator ExecutePattern(LevelBoss boss, float duration = 1, System.Action onComplete = null)
         {
-            Debug.Log("executing circle move");
             Transform bossTransform = boss.transform;
             float angle = startAngle;
             float totalAngle = 360f * revolutions + startAngle;
@@ -31,7 +30,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 yield return null;
             }
             
-            Debug.Log("circle move complete");
             onComplete?.Invoke();
         }
         

@@ -3,6 +3,7 @@ using System.Collections;
 using DG.Tweening;
 using RobbieWagnerGames.Managers;
 using RobbieWagnerGames.Utilities;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityExtensionMethods;
@@ -68,8 +69,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if(other.gameObject.CompareTag("asteroid") || other.gameObject.CompareTag("hazard"))
             {
-                other.GetComponent<Shootable>().destructionReason = DestructionReason.COLLISION_W_PLAYER;
-                Destroy(other.gameObject);
+                Debug.Log($"hit by {other.gameObject.name}");
+                Shootable shootable = other.GetComponent<Shootable>();
+                if (shootable != null)
+                {
+                    shootable.destructionReason = DestructionReason.COLLISION_W_PLAYER;
+                    shootable.DecreaseDurability();
+                }
                 OnPlayerHit();
             }
         }

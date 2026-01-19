@@ -288,7 +288,6 @@ namespace RobbieWagnerGames.UI
         
         public virtual void Open()
         {
-            Debug.Log("open");
             if (disableGameControlsWhenOpen)
             {
                 previousActiveMaps.Clear();
