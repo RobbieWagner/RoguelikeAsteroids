@@ -17,26 +17,37 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected override void StartLevel(Level level)
         {
             base.StartLevel(level);
-
-            //TODO: create a cinematic intro sequence using either do tween or a "movement pattern"
+            Player.Instance?.DisableControls();
             StartBossBattle();
         }
         
         private void StartBossBattle()
         {
             boss.OnBossDestroyed += OnBossDefeated;
-            //SETUP BOSS BEHAVIOR/TRIGGER IT
+            boss.OnIntroPhaseComplete += OnIntroPhaseComplete;
+            boss.OnOutroPhaseComplete += OnOutroPhaseComplete;
+            boss.StartBoss();
+        }
+        
+        private void OnIntroPhaseComplete()
+        {
+            Player.Instance?.EnableControls();
+            ShootableManager.Instance.StartAsteroidSpawner();
+        }
+        
+        private void OnOutroPhaseComplete()
+        {
+            CompleteLevel();
         }
         
         private void OnBossDefeated()
         {
-            CompleteLevel();
+            
         }
          
         protected override void OnLevelTimerComplete()
         {
-            // Don't auto-complete on timer for boss levels
-            // Boss must be defeated
+            
         }
         
         protected override void OnDestroy()
@@ -44,7 +55,11 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             base.OnDestroy();
             
             if (boss != null)
+            {
                 boss.OnBossDestroyed -= OnBossDefeated;
+                boss.OnIntroPhaseComplete -= OnIntroPhaseComplete;
+                boss.OnOutroPhaseComplete -= OnOutroPhaseComplete;
+            }
         }
     }
 }

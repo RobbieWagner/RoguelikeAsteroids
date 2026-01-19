@@ -27,6 +27,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private Coroutine asteroidSpawnCoroutine = null;
         private bool isActive = false;
+        [SerializeField] private bool startOnLevelStart = true;
         
         public event Action<Shootable, DestructionReason> ShootableDestroyedEvent;
 
@@ -35,7 +36,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             base.Awake();
             
-            levelController.OnLevelStarted += StartAsteroidSpawner;
+            if(startOnLevelStart)
+                levelController.OnLevelStarted += StartAsteroidSpawner;
             levelController.OnLevelFailed += StopAndClearAllShootables;
             levelController.OnLevelCompleted += StopAndClearAllShootables;
         }

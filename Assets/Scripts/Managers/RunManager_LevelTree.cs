@@ -24,7 +24,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if (currentRun.levelTree.Count == 0) return;
             
-            Level rootLevel = CreateLevel(LevelType.ASTEROIDS, 0, baseDifficulty);
+            Level rootLevel = CreateLevel(LevelType.ASTEROIDS, 0, baseDifficulty, 20f);
             LevelNode rootNode = new LevelNode
             {
                 level = rootLevel,
@@ -85,7 +85,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                     bool isShop = shopIndices.Contains(positionIndex);
                     LevelType levelType = isShop ? LevelType.SHOP : LevelType.ASTEROIDS;
                     
-                    Level level = CreateLevel(levelType, tier, baseDifficulty);
+                    Level level = CreateLevel(levelType, tier, baseDifficulty, 20 + tier * 1.5f);
                     LevelNode node = new LevelNode
                     {
                         level = level,
@@ -106,7 +106,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             int lastTier = totalTiers - 1;
             
             LevelType bossType = includeBosses ? LevelType.BOSS : LevelType.ASTEROIDS;
-            Level bossLevel = CreateLevel(bossType, lastTier, baseDifficulty);
+            Level bossLevel = CreateLevel(bossType, lastTier, baseDifficulty, -1);
             
             LevelNode bossNode = new LevelNode
             {
@@ -118,7 +118,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             currentRun.levelTree[lastTier].Add(bossNode);
         }
 
-        private Level CreateLevel(LevelType type, int tier, float baseDifficulty)
+        private Level CreateLevel(LevelType type, int tier, float baseDifficulty, float levelDuration)
         {
             float difficultyMultiplier = CalculateLevelDifficulty(tier, baseDifficulty);
             
@@ -127,7 +127,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 levelType = type,
                 difficultyMultiplier = difficultyMultiplier,
                 sceneToLoad = GetSceneForLevelType(type),
-                tier = tier
+                tier = tier,
+                levelDuration = levelDuration
             };
             
             ConfigureLevelParameters(level);

@@ -5,7 +5,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 {
     public abstract class BossPattern : ScriptableObject
     {
-        public string patternName;
         public float duration;
         public bool canBeInterrupted = false;
         
@@ -15,8 +14,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
     public abstract class BossMovementPattern : BossPattern
     {
-        public AnimationCurve movementCurve;
-        public float movementSpeed = 5f;
     }
 
     public abstract class BossAttackPattern : BossPattern

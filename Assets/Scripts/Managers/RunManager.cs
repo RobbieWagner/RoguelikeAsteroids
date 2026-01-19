@@ -123,13 +123,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         }
 
         public IEnumerator StartCurrentLevelCo()
-        {
-            if (currentRun.IsComplete)
-            {
-                Debug.Log($"{currentRun.currentTier} {currentRun.tiers} ");
-                yield break;
-            }
-                
+        {       
             Level level = currentRun.CurrentLevel;
         
             yield return SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, false, null, false);

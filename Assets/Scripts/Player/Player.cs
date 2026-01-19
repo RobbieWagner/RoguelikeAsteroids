@@ -38,6 +38,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private Vector2 movementBounds;
 
         private Coroutine disableCollCo = null;
+        [SerializeField] private bool enableByDefault = true;
 
         protected override void Awake()
         {
@@ -50,7 +51,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             InputManager.Instance.Controls.GAME.MousePosition.performed += OnMouseDelta;
             InputManager.Instance.Controls.GAME.Shoot.performed += OnShoot;
 
-            EnableControls();
+            if (enableByDefault)
+                EnableControls();
 
             PlayerManager.Instance.RegisterPlayer(this);
         }

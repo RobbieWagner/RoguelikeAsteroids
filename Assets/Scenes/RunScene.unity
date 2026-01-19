@@ -914,7 +914,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultRun:
     runSeed: 0
-    tiers: 15
+    tiers: 2
     difficulty: 1
     includeBossLevels: 1
     runResources:
