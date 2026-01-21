@@ -23,7 +23,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private void StartBossBattle()
         {
-            boss.OnBossDestroyed += OnBossDefeated;
+            boss.OnBossDefeated += OnBossDefeated;
             boss.OnIntroPhaseComplete += OnIntroPhaseComplete;
             boss.OnOutroPhaseComplete += OnOutroPhaseComplete;
             boss.StartBoss();
@@ -47,7 +47,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private void OnBossDefeated()
         {
-            
+            ShootableManager.Instance.StopAndClearAllShootables();
         }
          
         protected override void OnLevelTimerComplete()
@@ -61,7 +61,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             if (boss != null)
             {
-                boss.OnBossDestroyed -= OnBossDefeated;
+                boss.OnBossDefeated -= OnBossDefeated;
                 boss.OnIntroPhaseComplete -= OnIntroPhaseComplete;
                 boss.OnOutroPhaseComplete -= OnOutroPhaseComplete;
             }

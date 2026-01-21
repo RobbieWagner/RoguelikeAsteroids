@@ -21,7 +21,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             bossHealthSlider.gameObject.SetActive(true);
             
             boss.OnIntroPhaseComplete += OnBossIntroComplete;
-            boss.OnBossDestroyed += OnBossDefeated;
+            boss.OnBossDefeated += OnBossDefeated;
             
             bossHealthSlider.minValue = 0;
             bossHealthSlider.maxValue = boss.durability;
@@ -50,7 +50,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             base.OnDestroy();
 
             boss.OnIntroPhaseComplete -= OnBossIntroComplete;
-            boss.OnBossDestroyed -= OnBossDefeated;
+            boss.OnBossDefeated -= OnBossDefeated;
         }
         
     }

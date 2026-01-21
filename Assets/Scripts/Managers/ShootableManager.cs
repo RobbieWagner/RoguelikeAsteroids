@@ -147,7 +147,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             }
         }
 
-        private void StopAndClearAllShootables()
+        public void StopAndClearAllShootables()
         {
             StopAsteroidSpawner();
             ClearAllShootables();

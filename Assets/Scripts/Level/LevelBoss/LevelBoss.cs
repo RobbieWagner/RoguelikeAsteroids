@@ -66,7 +66,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private ParticleSystem damageParticles;
 
         public event Action OnBossDamaged;
-        public event Action OnBossDestroyed;
+        public event Action OnBossDefeated;
         public event Action<BossState> OnStateChanged;
         public event Action OnIntroPhaseComplete;
         public event Action OnOutroPhaseComplete;
@@ -138,10 +138,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private IEnumerator ExecuteOutroPhase()
         {
+            OnBossDefeated?.Invoke();
             ChangeState(BossState.DEFEATED);
             yield return ExecutePhaseSequence(outroPhase);
             OnOutroPhaseComplete?.Invoke();
-            OnBossDestroyed?.Invoke();
         }
         
         private IEnumerator ExecuteBossPhase(List<BossPhaseState> phase)

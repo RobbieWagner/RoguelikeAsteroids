@@ -19,6 +19,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         [Header("Resource Display")]
         [SerializeField] private ResourceUI resourceUIPrefab;
+
+        [Header("Audio")]
+        [SerializeField] private AudioSource victorySound;
+        [SerializeField] private AudioSource resourceCountSound;
         
         private Dictionary<ResourceType, ResourceUI> displayedResources = new Dictionary<ResourceType, ResourceUI>();
         private AsteroidsLevelController levelController;
@@ -35,6 +39,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             canvasGroup.alpha = 0;
             canvas.enabled = true;
             yield return canvasGroup.DOFade(1, fadeDuration).WaitForCompletion();
+
+            victorySound.Play();
 
             yield return StartCoroutine(DisplayResourcesAnimated());
             yield return new WaitForSeconds(displayDuration);
@@ -73,6 +79,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             yield return resourceLayoutTransform.DOSizeDelta(new Vector2(targetWidth, resourceLayoutTransform.sizeDelta.y), 0.5f)
                 .SetEase(Ease.OutBack)
                 .WaitForCompletion();
+   
         }
 
         private IEnumerator AnimateResourceTransfer()
@@ -89,7 +96,14 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             }
             
             foreach (Coroutine coroutine in transferCoroutines)
+            {
+                resourceCountSound.loop = true;
+                resourceCountSound.Play();
+                
                 yield return coroutine;
+
+                resourceCountSound.loop = false;
+            }
 
             foreach (KeyValuePair<ResourceType, int> resource in levelController.collectedResources)
             {
