@@ -1,11 +1,9 @@
-using System;
 using System.Collections;
-using DG.Tweening;
 using RobbieWagnerGames.Managers;
 using RobbieWagnerGames.Utilities;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using UnityExtensionMethods;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
@@ -40,6 +38,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private Coroutine disableCollCo = null;
         [SerializeField] private bool enableByDefault = true;
+
+        [SerializeField] private Slider weaponCooldownSlider;
 
         protected override void Awake()
         {
@@ -128,6 +128,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void UpdateShooter()
         {
             shooterCooldownTimer = Mathf.Clamp(shooterCooldownTimer - Time.deltaTime, 0, shooterCooldown); 
+            weaponCooldownSlider.value = shooterCooldownTimer;
         }
 
         private void OnMove(InputAction.CallbackContext context)

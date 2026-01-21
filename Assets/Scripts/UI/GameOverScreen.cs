@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using TMPro;
 using DG.Tweening;
 using RobbieWagnerGames.UI;
-using System;
-using System.Collections;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
