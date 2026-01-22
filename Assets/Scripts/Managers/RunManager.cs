@@ -99,14 +99,17 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             //TODO: create resource distribution for level
         }
 
-        public void StartRun()
+        public void LoadRun()
         {
             currentRun = JsonDataService.Instance.LoadDataRelative<Run>(GameConstants.RunPath, null);
 
             if (currentRun == null)
                 CreateNewRun(defaultRun.tiers, defaultRun.difficulty, defaultRun.shopRatio, defaultRun.includeBossLevels);
             else
-                LoadRun();
+            {
+                currentRun.DeserializeNodeTree();
+                ResourceManager.Instance.InitializeResourceDictionary(currentRun.runResources);
+            }
 
             // LogLevelTree();
 
@@ -114,12 +117,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             OnRunStarted?.Invoke(currentRun);
             
             ContinueRun();
-        }
-
-        private void LoadRun()
-        {
-            currentRun.DeserializeNodeTree();
-            ResourceManager.Instance.InitializeResourceDictionary(currentRun.runResources);
         }
 
         public IEnumerator StartCurrentLevelCo()
@@ -130,7 +127,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             yield return SceneLoadManager.Instance.LoadSceneAdditive(level.sceneToLoad, true, () => {OnStartLevel?.Invoke(level);});
         }
 
-        public void CompleteCurrentLevel()
+        public void CompleteCurrentLevel(int vp = 0)
         {
             InputManager.Instance.DisableActionMap(ActionMapName.GAME);
 
@@ -138,6 +135,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             Level level = currentRun.CurrentLevel;
             if (level == null) return;
+
+            currentRun.victoryPoints += vp;
 
             StartCoroutine(SceneLoadManager.Instance.UnloadScenes(new () {"AsteroidsScene", "ShopScene", "BossScene"}, true, () => { ContinueRun(); } ));           
         }
@@ -167,6 +166,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void EndRun(bool success)
         {
             Run completedRun = currentRun;
+            GameManager.Instance.currentSave.victoryPoints += completedRun.victoryPoints;
             currentRun = null;
             DeleteRunData();
             OnRunEnded?.Invoke(completedRun);

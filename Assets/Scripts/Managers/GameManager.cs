@@ -5,10 +5,16 @@ using RobbieWagnerGames.Audio;
 using RobbieWagnerGames.Managers;
 using RobbieWagnerGames.UI;
 using RobbieWagnerGames.Utilities;
+using RobbieWagnerGames.Utilities.SaveData;
 using UnityEngine;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
+    public class RoguelikeAsteroidsSaveData
+    {
+        public int victoryPoints = 0;
+    }
+
     public class GameManager : MonoBehaviourSingleton<GameManager>
     {
         public event Action OnGameStart;
@@ -24,9 +30,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private Coroutine sceneTransitionCo = null;
         [SerializeField] private SettingsMenu settingsMenu = null;
 
+        [HideInInspector] public RoguelikeAsteroidsSaveData currentSave; 
+
         protected override void Awake()
         {
             base.Awake();
+            currentSave = JsonDataService.Instance.LoadDataRelative(GameConstants.GameData, new RoguelikeAsteroidsSaveData());
             LoadMenu();
         }
 
@@ -86,6 +95,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private IEnumerator ReturnToMenuCo()
         {
+            SaveGame();
             yield return SceneLoadManager.Instance.UnloadScene("RunScene", false);
             yield return SceneLoadManager.Instance.LoadSceneAdditive("MenuScene", true, () => { InputManager.Instance.DisableActionMap(ActionMapName.PAUSE); });
             OnReturnToMenu?.Invoke();
@@ -123,6 +133,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         public void SaveGame()
         {
+            JsonDataService.Instance.SaveData(GameConstants.GameData, currentSave);
             OnGameSaved?.Invoke();
         }
     }

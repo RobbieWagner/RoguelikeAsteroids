@@ -24,7 +24,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
 		private void ConfigurePlayerStats(Level level)
         {
-			currentPlayer.speed -= RunManager.Instance.CurrentRun.speedModifier;
+			currentPlayer.speed += RunManager.Instance.CurrentRun.speedModifier;
             currentPlayer.shooterCooldown -= RunManager.Instance.CurrentRun.fireCooldownModifier;
         
 			currentPlayer.fireRange += RunManager.Instance.CurrentRun.fireRangeModifier;

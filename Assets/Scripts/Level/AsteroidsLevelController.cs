@@ -21,10 +21,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public event Action<ResourceType, int> OnResourceAdded;
         public event Action<Dictionary<ResourceType, int>> OnResourcesUpdated;
 
+        [SerializeField] private int levelCompleteVP = 1;
+
 		protected override void Awake() 
 		{
             base.Awake();
 			levelTimer.OnTimerComplete += OnLevelTimerComplete;
+            PlayerManager.Instance.OnPlayerHit += OnPlayerHit;
 		}
 
         protected override void Update()
@@ -36,6 +39,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         protected override void StartLevel(Level level)
         {
             base.StartLevel(level);
+            StartCoroutine(PlayerHUD.Instance.DisplayLevelStart(() => {InvokeLevelStartAction();}));
 			collectedResources.Clear();
 
 			if(level.stopAtTimer)
@@ -63,7 +67,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private IEnumerator DisplayLevelCompletionScreen()
         {
 			yield return levelCompleteScreen.DisplayScreen();
-            RunManager.Instance.CompleteCurrentLevel();
+            RunManager.Instance.CompleteCurrentLevel(levelCompleteVP);
         }
 
         protected override void UnsubscribeEvents()

@@ -27,7 +27,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             base.Awake();
             
             newRunButton.onClick.AddListener(() => HandleNewRunButtonPressed());
-            continueButton.onClick.AddListener(() => RunManager.Instance.StartRun());
+            continueButton.onClick.AddListener(() => RunManager.Instance.LoadRun());
             mainMenuButton.onClick.AddListener(() => RunManager.Instance.ReturnToMainMenu());
             
             hasExistingRun = JsonDataService.Instance.LoadDataRelative<Run>(GameConstants.RunPath, null) != null;
@@ -45,7 +45,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             if (hasExistingRun)
                 ShowNewRunPrompt();
-            else RunManager.Instance.StartRun();
+            else RunManager.Instance.LoadRun();
         }
 
         public void ShowNewRunPrompt()
@@ -56,7 +56,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 () => 
                 {
                     JsonDataService.Instance.DeleteData(GameConstants.RunPath);
-                    RunManager.Instance.StartRun();
+                    RunManager.Instance.LoadRun();
                 },
                 null
             );

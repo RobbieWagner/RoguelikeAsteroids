@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using TMPro;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -10,6 +11,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 		[SerializeField] private Canvas canvas;
 		[SerializeField] private ResourceUI resourceUIPrefab;
 		[SerializeField] private LayoutGroup resourcesList;
+		[SerializeField] private TextMeshProUGUI vpText;
 		private List<ResourceUI> displayedResourceUIs = new List<ResourceUI>();
 		
 		private Dictionary<ResourceType, ResourceUI> activeResourceUIs = new Dictionary<ResourceType, ResourceUI>();
@@ -26,6 +28,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
 			canvas.enabled = true;
 			InitializeResourceUI();
+			vpText.text = $"x {run.victoryPoints}";
         }
 		
         private void HideHUD(Level level)

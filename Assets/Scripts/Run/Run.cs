@@ -24,6 +24,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             currentNode.tier == levelTree.Count - 1 && currentNode.connections.Count == 0);
         [JsonIgnore] public Level CurrentLevel => currentNode?.level;
 
+        public int victoryPoints = 0;
+
         [Header("Shopping/Items")]
         [JsonProperty] [SerializedDictionary] public SerializedDictionary<ResourceType, int> runResources = new SerializedDictionary<ResourceType, int>();
         public float shopRatio = .1f;

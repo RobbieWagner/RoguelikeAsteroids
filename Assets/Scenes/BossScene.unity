@@ -1432,6 +1432,7 @@ MonoBehaviour:
   levelCompleteScreen: {fileID: 1623806061}
   parallaxFollow: {fileID: 1556330342}
   parallaxSpeed: 2
+  levelCompleteVP: 3
   boss: {fileID: 944129981}
   spawnAsteroids: 1
   asteroidSpawnRate: 2

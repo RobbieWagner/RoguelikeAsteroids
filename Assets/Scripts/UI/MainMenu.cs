@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using RobbieWagnerGames.UI;
 using RobbieWagnerGames.Audio;
+using TMPro;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -10,6 +11,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private Button playButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button exitButton;
+        [SerializeField] private TextMeshProUGUI victoryPointsText;
         public override bool IsOpen => base.IsOpen && !isSettingsOpen;
 
         protected override void Awake() 
@@ -26,6 +28,8 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             Open();
             activeMenu = this;
+
+            victoryPointsText.text = $"x {GameManager.Instance.currentSave.victoryPoints}";
         }
 
         private void OnPlayButtonClicked()
