@@ -11,7 +11,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 {
     public partial class RunManager : MonoBehaviourSingleton<RunManager>
     {   
-        [SerializeField] private Run defaultRun = new Run();
+        public Run defaultRun = new Run();
         private Run currentRun;
         
         public event Action<Run> OnRunStarted;
@@ -38,7 +38,13 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void OnGameStarted()
         {
             currentRun = null;
-            ShowRunMenu();
+    
+            bool hasExistingRun = JsonDataService.Instance.LoadDataRelative<Run>(GameConstants.RunPath, null) != null;
+            
+            if (hasExistingRun)
+                LoadRun();
+            else
+                OnShowRunMenu?.Invoke();
         }
 
         public void CreateNewRun(int tiers, float difficulty, float shopRatio, bool includeBosses)
@@ -170,11 +176,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             currentRun = null;
             DeleteRunData();
             OnRunEnded?.Invoke(completedRun);
-        }
-
-        private void ShowRunMenu()
-        {
-            OnShowRunMenu?.Invoke();
         }
 
         private Coroutine returnToMenuCo = null;

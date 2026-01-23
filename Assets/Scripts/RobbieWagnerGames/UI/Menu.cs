@@ -548,7 +548,7 @@ namespace RobbieWagnerGames.UI
                     return;
                 }
 
-            } while (!selectableElements[newIndex].interactable || !selectableElements[newIndex].gameObject.activeInHierarchy);
+            } while (!selectableElements[newIndex].gameObject.activeInHierarchy);
 
             currentSelectedIndex = newIndex;
             ForceSelectElement(selectableElements[currentSelectedIndex]);

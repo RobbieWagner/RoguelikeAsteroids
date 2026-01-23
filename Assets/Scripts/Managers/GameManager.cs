@@ -12,7 +12,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 {
     public class RoguelikeAsteroidsSaveData
     {
-        public int victoryPoints = 0;
+        public int victoryPoints = 1;
     }
 
     public class GameManager : MonoBehaviourSingleton<GameManager>
@@ -50,7 +50,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 { "player", PlayerPrefs.GetFloat("PlayerVolume", 1f) }  
             };
             AudioMixerController.Instance.UpdateAudioMixer(audioMixerVolumes);
-            
 
             StartCoroutine(SceneLoadManager.Instance.LoadSceneAdditive("MenuScene", false));
         }

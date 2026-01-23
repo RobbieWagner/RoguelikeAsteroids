@@ -3,40 +3,101 @@ using UnityEngine.UI;
 using RobbieWagnerGames.UI;
 using RobbieWagnerGames.Audio;
 using TMPro;
+using RobbieWagnerGames.Utilities.SaveData;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
     public partial class MainMenu : Menu
     {
-        [SerializeField] private Button playButton;
+        [SerializeField] private Button continueButton;
+        [SerializeField] private Button newRunButton;
+        [SerializeField] private Button purgeDataButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button exitButton;
         [SerializeField] private TextMeshProUGUI victoryPointsText;
         public override bool IsOpen => base.IsOpen && !isSettingsOpen;
 
+        private bool hasExistingRun = false;
+
         protected override void Awake() 
         {
             base.Awake();
             
-            playButton.onClick.AddListener(OnPlayButtonClicked);
+            hasExistingRun = JsonDataService.Instance.LoadDataRelative<Run>(GameConstants.RunPath, null) != null;
+            
+            continueButton.onClick.AddListener(OnContinueButtonClicked);
+            newRunButton.onClick.AddListener(OnNewRunButtonClicked);
+            purgeDataButton.onClick.AddListener(OnPurgeDataButtonClicked);
             settingsButton.onClick.AddListener(OnSettingsButtonClicked);
             exitButton.onClick.AddListener(OnExitButtonClicked);
             
-            settingsMenuPanel.SetActive(false);
-            
-            firstSelected = playButton;
+            continueButton.gameObject.SetActive(hasExistingRun);
 
+            settingsMenuPanel.SetActive(false);
+
+            firstSelected = hasExistingRun ? continueButton : newRunButton;
+            
             Open();
             activeMenu = this;
 
             victoryPointsText.text = $"x {GameManager.Instance.currentSave.victoryPoints}";
         }
 
-        private void OnPlayButtonClicked()
+        private void OnContinueButtonClicked()
         {
             BasicAudioManager.Instance.Play(AudioSourceName.UISelect);
             Close();
             GameManager.Instance.StartGame();
+        }
+
+        private void OnNewRunButtonClicked()
+        {
+            BasicAudioManager.Instance.Play(AudioSourceName.UISelect);
+            
+            if (hasExistingRun)
+            {
+                PromptManager.Instance.ShowConfirmationPrompt(
+                    "Start New Run?",
+                    "This will delete your current run progress. Are you sure?",
+                    () => 
+                    {
+                        JsonDataService.Instance.DeleteData(GameConstants.RunPath);
+                        Close();
+                        GameManager.Instance.StartGame();
+                    },
+                    null
+                );
+            }
+            else
+            {
+                Close();
+                GameManager.Instance.StartGame();
+            }
+        }
+
+        private void OnPurgeDataButtonClicked()
+        {
+            BasicAudioManager.Instance.Play(AudioSourceName.UISelect);
+            PromptManager.Instance.ShowConfirmationPrompt(
+                "Purge All Save Data?",
+                "This will delete ALL save data including victory points and run progress. Are you sure?",
+                () => 
+                {
+                    bool success = JsonDataService.Instance.PurgeData();
+                    if (success)
+                    {
+                        GameManager.Instance.currentSave = new RoguelikeAsteroidsSaveData();
+                        GameManager.Instance.SaveGame();
+                        
+                        victoryPointsText.text = $"x {GameManager.Instance.currentSave.victoryPoints}";
+                        hasExistingRun = false;
+                        continueButton.gameObject.SetActive(false);
+                        firstSelected = newRunButton;
+                        SetupNavigation();
+                    }
+                },
+                null
+            );
         }
 
         private void OnSettingsButtonClicked()
@@ -90,7 +151,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {   
             base.OnDestroy();
 
-            playButton.onClick.RemoveAllListeners();
+            continueButton.onClick.RemoveAllListeners();
+            newRunButton.onClick.RemoveAllListeners();
+            purgeDataButton.onClick.RemoveAllListeners();
             settingsButton.onClick.RemoveAllListeners();
             exitButton.onClick.RemoveAllListeners();
             

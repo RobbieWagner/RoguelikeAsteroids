@@ -31,13 +31,14 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             previouslySelected = EventSystemManager.Instance?.CurrentSelected?.GetComponent<Selectable>();
 
-            playButton.gameObject.SetActive(false);
+            continueButton.gameObject.SetActive(false);
+            newRunButton.gameObject.SetActive(false);
+            purgeDataButton.gameObject.SetActive(false);
             settingsButton.gameObject.SetActive(false);
             exitButton.gameObject.SetActive(false);
             
             settingsMenuPanel.SetActive(true);
             
-            // Set settings menu as active
             activeMenu = settingsMenu;
             
             settingsMenu.backButton.onClick.RemoveAllListeners();
@@ -63,13 +64,16 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             settingsMenuPanel.SetActive(false);
             settingsMenu.Close();
             
-            playButton.gameObject.SetActive(true);
+            continueButton.gameObject.SetActive(hasExistingRun);
+            newRunButton.gameObject.SetActive(true);
+            purgeDataButton.gameObject.SetActive(true);
             settingsButton.gameObject.SetActive(true);
             exitButton.gameObject.SetActive(true);
             
             activeMenu = this;
             
-            firstSelected = previouslySelected != null ? previouslySelected : playButton;
+            firstSelected = previouslySelected != null ? previouslySelected : 
+                           (hasExistingRun ? continueButton : newRunButton);
             RefreshSelectableElements();
             SetupNavigation();
 

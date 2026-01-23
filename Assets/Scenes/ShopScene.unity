@@ -304,6 +304,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   failOnDeath: 0
+  menu: {fileID: 243532121}
 --- !u!1 &1208955491
 GameObject:
   m_ObjectHideFlags: 0

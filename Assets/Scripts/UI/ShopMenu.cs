@@ -90,6 +90,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         
         private void PopulateShop()
         {
+            Debug.Log("pop shop");
             foreach (Transform child in buttonContainer)
                 Destroy(child.gameObject);
             
@@ -97,6 +98,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             foreach (ShopItem item in availableItems)
             {
+                Debug.Log("item");
                 if (itemData.TryGetValue(item.name, out ShopItemData data))
                 {
                     ShopButton button = Instantiate(shopButtonPrefab, buttonContainer);
