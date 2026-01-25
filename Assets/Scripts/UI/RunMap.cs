@@ -34,6 +34,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
             canvasGroup.alpha = 1;
             canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
             
             StartSelectionMaintenance();
         }

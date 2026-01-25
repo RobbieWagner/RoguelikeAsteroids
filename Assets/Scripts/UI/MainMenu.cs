@@ -14,7 +14,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         [SerializeField] private Button purgeDataButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button exitButton;
-        [SerializeField] private TextMeshProUGUI victoryPointsText;
         public override bool IsOpen => base.IsOpen && !isSettingsOpen;
 
         private bool hasExistingRun = false;
@@ -39,8 +38,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             
             Open();
             activeMenu = this;
-
-            victoryPointsText.text = $"x {GameManager.Instance.currentSave.victoryPoints}";
         }
 
         private void OnContinueButtonClicked()
@@ -89,7 +86,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                         GameManager.Instance.currentSave = new RoguelikeAsteroidsSaveData();
                         GameManager.Instance.SaveGame();
                         
-                        victoryPointsText.text = $"x {GameManager.Instance.currentSave.victoryPoints}";
                         hasExistingRun = false;
                         continueButton.gameObject.SetActive(false);
                         firstSelected = newRunButton;

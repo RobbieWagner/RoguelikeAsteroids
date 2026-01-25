@@ -13,6 +13,23 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
     {   
         public Run defaultRun = new Run();
         private Run currentRun;
+        public Run CurrentRun
+        {
+            get 
+            { 
+                return currentRun; 
+            }
+            set 
+            { 
+                if(currentRun == value)
+                    return;
+
+                OnSetRun?.Invoke(currentRun);
+                
+                currentRun = value; 
+            }
+        }
+        public event Action<Run> OnSetRun;
         
         public event Action<Run> OnRunStarted;
         public event Action<Run> OnNewRunStarted;
@@ -25,7 +42,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public event Action OnHideRunMenu;
         
         public bool IsRunActive => currentRun != null && !currentRun.IsComplete;
-        public Run CurrentRun => currentRun;
 
         protected override void Awake()
         {
@@ -47,22 +63,12 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 OnShowRunMenu?.Invoke();
         }
 
-        public void CreateNewRun(int tiers, float difficulty, float shopRatio, bool includeBosses)
+        public void InitializeRun(Run newRun)
         {
-            currentRun = new Run
-            {
-                tiers = tiers,
-                difficulty = difficulty,
-                shopRatio = shopRatio,
-                includeBossLevels = includeBosses,
-                runResources = CalculateStartingResources(),
-                startingHealth = 3,
-                health = 3
-            };
+            GenerateLevelTree(newRun);
+            ResourceManager.Instance.InitializeResourceDictionary(newRun.runResources);
 
-            GenerateLevelTree(tiers, difficulty, shopRatio, includeBosses);
-            ResourceManager.Instance.InitializeResourceDictionary(currentRun.runResources);
-
+            CurrentRun = newRun;
             OnNewRunStarted?.Invoke(currentRun);
         }
 
@@ -105,19 +111,24 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             //TODO: create resource distribution for level
         }
 
+        public void StartNewRun(Run newRun)
+        {
+            InitializeRun(newRun);
+
+            ResourceManager.Instance.InitializeResourceDictionary(currentRun.runResources);
+
+            OnHideRunMenu?.Invoke();
+            OnRunStarted?.Invoke(currentRun);
+            
+            ContinueRun();
+        }
+
         public void LoadRun()
         {
             currentRun = JsonDataService.Instance.LoadDataRelative<Run>(GameConstants.RunPath, null);
-
-            if (currentRun == null)
-                CreateNewRun(defaultRun.tiers, defaultRun.difficulty, defaultRun.shopRatio, defaultRun.includeBossLevels);
-            else
-            {
-                currentRun.DeserializeNodeTree();
-                ResourceManager.Instance.InitializeResourceDictionary(currentRun.runResources);
-            }
-
-            // LogLevelTree();
+        
+            currentRun.DeserializeNodeTree();
+            ResourceManager.Instance.InitializeResourceDictionary(currentRun.runResources);
 
             OnHideRunMenu?.Invoke();
             OnRunStarted?.Invoke(currentRun);

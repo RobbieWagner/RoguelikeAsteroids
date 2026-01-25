@@ -54,6 +54,9 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public float bulletSpeedModifier = 0;
         public float fireRangeModifier = 0;
         public int novaBlasts = 0;
+        public bool hasMiniLaser = false;
+        public bool hasBuckshot = false;
+        public bool hasRocketLauncher = false;
 
         public void PrepForSerialization()
         {

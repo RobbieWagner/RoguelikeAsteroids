@@ -95,13 +95,10 @@ namespace RobbieWagnerGames.UI
             InputAction submitAction = InputManager.Instance.GetAction(ActionMapName.UI, "Submit");
             InputAction cancelAction = InputManager.Instance.GetAction(ActionMapName.UI, "Cancel");
             InputAction clickAction = InputManager.Instance.GetAction(ActionMapName.UI, "Click");
-            
-            if (submitAction != null)
-                submitAction.performed += OnSubmitPerformed;
-            if (cancelAction != null)
-                cancelAction.performed += OnCancelPerformed;
-            if (clickAction != null)
-                clickAction.performed += OnClickPerformed;
+        
+            submitAction.performed += OnSubmitPerformed;
+            cancelAction.performed += OnCancelPerformed;
+            clickAction.performed += OnClickPerformed;
             
             RefreshSelectableElements();
             
@@ -117,13 +114,10 @@ namespace RobbieWagnerGames.UI
             InputAction cancelAction = InputManager.Instance.GetAction(ActionMapName.UI, "Cancel");
             InputAction clickAction = InputManager.Instance.GetAction(ActionMapName.UI, "Click");
             
-            if (submitAction != null)
-                submitAction.performed -= OnSubmitPerformed;
-            if (cancelAction != null)
-                cancelAction.performed -= OnCancelPerformed;
-            if (clickAction != null)
-                clickAction.performed -= OnClickPerformed;
-            
+            submitAction.performed -= OnSubmitPerformed;
+            cancelAction.performed -= OnCancelPerformed;
+            clickAction.performed -= OnClickPerformed;
+        
             StopSelectionMaintenance();
         }
         

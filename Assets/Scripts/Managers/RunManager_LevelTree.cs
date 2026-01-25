@@ -6,25 +6,25 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 {
 	public partial class RunManager : MonoBehaviourSingleton<RunManager>
 	{
-		private void GenerateLevelTree(int tiers, float difficulty, float shopRatio, bool includeBosses)
+		private void GenerateLevelTree(Run run)
         {
-            currentRun.levelTree.Clear();
+            run.levelTree.Clear();
             
-            for (int i = 0; i < tiers; i++)
-                currentRun.levelTree.Add(new List<LevelNode>());
+            for (int i = 0; i < run.tiers; i++)
+                run.levelTree.Add(new List<LevelNode>());
             
-            GenerateRootLevel(difficulty);
-            GenerateMiddleTiers(tiers, difficulty, shopRatio, includeBosses);
-            GenerateBossLevel(tiers, difficulty, includeBosses);
+            GenerateRootLevel(run);
+            GenerateMiddleTiers(run);
+            GenerateBossLevel(run);
 
-            RunTreeBuilder.ConnectLevelNodes(currentRun.levelTree);
+            RunTreeBuilder.ConnectLevelNodes(run.levelTree);
         }
 
-        private void GenerateRootLevel(float baseDifficulty)
+        private void GenerateRootLevel(Run run)
         {
-            if (currentRun.levelTree.Count == 0) return;
+            if (run.levelTree.Count == 0) return;
             
-            Level rootLevel = CreateLevel(LevelType.ASTEROIDS, 0, baseDifficulty, 20f);
+            Level rootLevel = CreateLevel(LevelType.ASTEROIDS, 0, run.difficulty, 20f);
             LevelNode rootNode = new LevelNode
             {
                 level = rootLevel,
@@ -32,22 +32,22 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 positionInTier = 0
             };
             
-            currentRun.levelTree[0].Add(rootNode);
+            run.levelTree[0].Add(rootNode);
         }
 
-        private void GenerateMiddleTiers(int totalTiers, float baseDifficulty, float shopRatio = .1f, bool includeBosses = true)
+        private void GenerateMiddleTiers(Run run)
         {
             List<int> levelCountsPerTier = new List<int>();
             int totalLevels = 0;
             
-            for (int tier = 1; tier < totalTiers - 1; tier++)
+            for (int tier = 1; tier < run.tiers - 1; tier++)
             {
                 int levelCount = Random.Range(2, 5);
                 levelCountsPerTier.Add(levelCount);
                 totalLevels += levelCount;
             }
             
-            int shopCount = Mathf.RoundToInt(totalLevels * shopRatio);
+            int shopCount = Mathf.RoundToInt(totalLevels * run.shopRatio);
             
             List<(int tier, int position)> allPositions = new List<(int tier, int position)>();
             int currentTier = 1;
@@ -85,7 +85,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                     bool isShop = shopIndices.Contains(positionIndex);
                     LevelType levelType = isShop ? LevelType.SHOP : LevelType.ASTEROIDS;
                     
-                    Level level = CreateLevel(levelType, tier, baseDifficulty, 20 + tier * 1.5f);
+                    Level level = CreateLevel(levelType, tier, run.difficulty, 20 + tier * 1.5f);
                     LevelNode node = new LevelNode
                     {
                         level = level,
@@ -93,20 +93,20 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                         positionInTier = position
                     };
                     
-                    currentRun.levelTree[tier].Add(node);
+                    run.levelTree[tier].Add(node);
                     positionIndex++;
                 }
             }
         }
 
-        private void GenerateBossLevel(int totalTiers, float baseDifficulty, bool includeBosses)
+        private void GenerateBossLevel(Run run)
         {
-            if (totalTiers <= 1) return;
+            if (run.tiers <= 1) return;
             
-            int lastTier = totalTiers - 1;
+            int lastTier = run.tiers  - 1;
             
-            LevelType bossType = includeBosses ? LevelType.BOSS : LevelType.ASTEROIDS;
-            Level bossLevel = CreateLevel(bossType, lastTier, baseDifficulty, -1);
+            LevelType bossType = run.includeBossLevels ? LevelType.BOSS : LevelType.ASTEROIDS;
+            Level bossLevel = CreateLevel(bossType, lastTier, run.difficulty, -1);
             
             LevelNode bossNode = new LevelNode
             {
@@ -115,7 +115,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
                 positionInTier = 0
             };
             
-            currentRun.levelTree[lastTier].Add(bossNode);
+            run.levelTree[lastTier].Add(bossNode);
         }
 
         private Level CreateLevel(LevelType type, int tier, float baseDifficulty, float levelDuration)

@@ -59,7 +59,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -199,7 +199,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 5255592075704993390}
+  m_TargetGraphic: {fileID: 8333650066396856151}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -219,7 +219,7 @@ MonoBehaviour:
   buttonText: {fileID: 535050498736381245}
   costText: {fileID: 3761845459683368931}
   currentLevelText: {fileID: 5008886715158580638}
-  purchaseIcon: {fileID: 1213901585045493710}
+  purchaseIcon: {fileID: 4708350930796078919}
   backgroundImage: {fileID: 8333650066396856151}
 --- !u!114 &4627882840390877273
 MonoBehaviour:
@@ -674,7 +674,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:

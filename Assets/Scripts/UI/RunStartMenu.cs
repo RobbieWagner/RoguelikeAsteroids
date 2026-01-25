@@ -5,6 +5,7 @@ using TMPro;
 using RobbieWagnerGames.Managers;
 using System.Collections.Generic;
 using System.Linq;
+using RobbieWagnerGames.Audio;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
@@ -38,38 +39,46 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         private void HandleStartRunButtonPressed()
         {
-            ApplyPurchasesToRun();
-            
-            RunManager.Instance.CreateNewRun(
-                tiers: 5,
-                difficulty: 1.0f,
-                shopRatio: 0.1f,
-                includeBosses: true
-            );
-            
-            RunManager.Instance.LoadRun();
+            Run run = CreateNewRun();
+            RunManager.Instance.StartNewRun(run);
+            Close();
         }
 
-        private void ApplyPurchasesToRun()
+        private Run CreateNewRun()
         {
-            if (RunManager.Instance.CurrentRun == null) return;
-            
-            Run run = RunManager.Instance.CurrentRun;
+            Run newRun = RunManager.Instance.defaultRun;
             
             foreach (KeyValuePair<RunPurchaseItem, int> kvp in purchasedItems)
-                ApplyItemEffectToRun(kvp.Key, kvp.Value, run);
+                ApplyItemEffectToRun(kvp.Key, kvp.Value, newRun);
+
+            return newRun;
         }
 
         private void ApplyItemEffectToRun(RunPurchaseItem item, int tier, Run run)
         {
-            // TODO: Implement actual effects based on item type
-            // This is where you'd modify run properties based on purchases
-            // Example:
-            // if (item.name.Contains("Health"))
-            //     run.startingHealth += 1;
-            // else if (item.name.Contains("Speed"))
-            //     run.speedModifier += 0.1f;
-            // etc.
+            switch (item.purchaseType)
+            {
+                case PurchaseType.MAX_HEALTH:
+                    run.startingHealth = 3 + tier;
+                    break;
+                case PurchaseType.FIRE_RATE:
+                    run.fireCooldownModifier = tier * .25f;
+                    break;
+                case PurchaseType.STARTING_NOVA_BURSTS:
+                    run.novaBlasts = tier;
+                    break;
+                case PurchaseType.BUCKSHOT:
+                    run.hasBuckshot = true;
+                    break;
+                case PurchaseType.ROCKET_LAUNCHER:
+                    run.hasRocketLauncher = true;
+                    break;
+                case PurchaseType.MINI_LASER:
+                    run.hasMiniLaser = true;
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void OnRunMenuRequested()
@@ -93,24 +102,10 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
 
         public override void Open()
         {
+            base.Open();
+
             PopulatePurchaseMenu();
             SetupNavigation();
-            
-            if (disableGameControlsWhenOpen)
-            {
-                previousActiveMaps.Clear();
-                previousActiveMaps.AddRange(InputManager.Instance.CurrentActiveMaps);
-            }
-
-            InputManager.Instance.EnableActionMap(ActionMapName.UI);
-            
-            canvas.enabled = true;
-            
-            lastMouseActivityTime = Time.time - mouseInactivityTimeout;
-            
-            StartSelectionMaintenance();
-
-            OnOpened();
         }
 
         protected override void OnOpened()
@@ -167,22 +162,19 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         private void OnItemPurchased(RunPurchaseItem item)
         {
             if (availableVictoryPoints < item.victoryPointCost) return;
-            
             usedVictoryPoints += item.victoryPointCost;
             
             if (purchasedItems.ContainsKey(item))
-            {
                 purchasedItems[item]++;
-                var button = purchaseButtons.FirstOrDefault(b => b.Item == item);
-                    button.IncrementTier();
-            }
             else
                 purchasedItems[item] = 1;
             
+            RunPurchaseButton button = purchaseButtons.FirstOrDefault(b => b.Item == item);
+                button.IncrementTier();
+
             RefreshPurchaseButtons();
-            
-            // Play purchase sound
-            // BasicAudioManager.Instance.Play(AudioSourceName.UISelect);
+
+            BasicAudioManager.Instance.Play(AudioSourceName.Purchase);
         }
 
         public override void RefreshSelectableElements()

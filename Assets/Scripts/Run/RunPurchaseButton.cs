@@ -32,14 +32,14 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
             button.onClick.AddListener(OnButtonClicked);
         }
 
-        private void UpdateButtonUI()
+        public void UpdateButtonUI()
         {
             if (item == null) return;
             
             buttonText.text = item.displayName;
             costText.text = $"{item.victoryPointCost}";
 
-            currentLevelText.text = $"{currentTier + 1}/{item.maxTiers}";
+            currentLevelText.text = $"{currentTier}/{item.maxTiers}";
             purchaseIcon.sprite = item.icon;
             backgroundImage.color = Color.white;
         }
@@ -48,7 +48,7 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         {
             button.interactable = canAfford;
 
-            backgroundImage.color = canAfford ? Color.white : new Color(0.7f, 0.7f, 0.7f, 0.7f);
+            backgroundImage.color = canAfford ? new Color(0.7f, 0.7f, 0.7f, 0.7f) : new Color(1f, 0.7f, 0.7f, 0.7f);
             costText.color = canAfford ? Color.white : Color.red;
         }
 

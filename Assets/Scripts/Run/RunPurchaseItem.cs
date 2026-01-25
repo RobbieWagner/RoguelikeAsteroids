@@ -2,6 +2,17 @@ using UnityEngine;
 
 namespace RobbieWagnerGames.RoguelikeAsteroids
 {
+
+    public enum PurchaseType
+    {
+        MAX_HEALTH,
+        FIRE_RATE,
+        MINI_LASER,
+        ROCKET_LAUNCHER,
+        BUCKSHOT,
+        STARTING_NOVA_BURSTS
+    }
+
     [CreateAssetMenu(fileName = "NewRunPurchaseItem", menuName = "RoguelikeAsteroids/Run Purchase Item")]
     public class RunPurchaseItem : ScriptableObject
     {
@@ -11,16 +22,6 @@ namespace RobbieWagnerGames.RoguelikeAsteroids
         public Sprite icon;
         [Tooltip("for single purchase, >1 for tiered upgrades")] public int maxTiers = 1;
         [Tooltip("The amount this item modifies a stat")] public float effectValue = 1f;
-        
-        public enum PurchaseType
-        {
-            MAX_HEALTH,
-            FIRE_RATE,
-            MINI_LASER,
-            ROCKET_LAUNCHER,
-            BUCKSHOT,
-            STARTING_NOVA_BURSTS
-        }
         
         public PurchaseType purchaseType;
     }
